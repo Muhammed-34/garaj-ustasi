@@ -20,6 +20,8 @@ var mice := PackedInt32Array()
 var belts := PackedInt32Array()
 var sacks_to_spawn := 0
 var keys_to_spawn := 0
+# Finished dishes that found no free top tile yet; the next refill drops them in.
+var dishes_to_spawn := 0
 var spawn_rng := RandomNumberGenerator.new()
 var shuffle_rng := RandomNumberGenerator.new()
 
@@ -190,6 +192,10 @@ func count_keys() -> int:
 	return kinds.count(M3.KEY)
 
 
+func count_dishes() -> int:
+	return kinds.count(M3.DISH)
+
+
 func obstacle_count() -> int:
 	var total := 0
 	for i in cell_count():
@@ -208,6 +214,7 @@ func clone() -> M3Board:
 	copy.belts = belts.duplicate()
 	copy.sacks_to_spawn = sacks_to_spawn
 	copy.keys_to_spawn = keys_to_spawn
+	copy.dishes_to_spawn = dishes_to_spawn
 	copy.spawn_rng.seed = spawn_rng.seed
 	copy.spawn_rng.state = spawn_rng.state
 	copy.shuffle_rng.seed = shuffle_rng.seed
@@ -227,14 +234,17 @@ func swap_cells(a: int, b: int) -> void:
 func generate() -> void:
 	var start_sacks := mini(MAX_SACKS_ON_BOARD, sacks_to_spawn)
 	var start_keys := mini(MAX_KEYS_ON_BOARD, keys_to_spawn)
+	var start_dishes := dishes_to_spawn
 	for attempt in 100:
 		_fill_without_matches()
 		_place_start_items(start_sacks, M3.SACK)
 		_place_start_items(start_keys, M3.KEY)
+		_place_start_items(start_dishes, M3.DISH)
 		if M3Matcher.find_groups(self).is_empty() and M3MoveFinder.has_move(self):
 			break
 	sacks_to_spawn -= start_sacks
 	keys_to_spawn -= start_keys
+	dishes_to_spawn -= start_dishes
 
 
 # Each returned Vector2i is (from_index, to_index). Fixed cells split a column into separate drops.
@@ -274,9 +284,14 @@ func collect_sacks() -> PackedInt32Array:
 # Removes keys that cannot fall any further (bottom row, or resting on an obstacle or hole)
 # and returns their cells. Unlike sacks, a key never gets stuck above an obstacle.
 func collect_keys() -> PackedInt32Array:
+	return collect_landed(M3.KEY)
+
+
+# Removes items of one kind that cannot fall any further and returns their cells.
+func collect_landed(kind: int) -> PackedInt32Array:
 	var collected := PackedInt32Array()
 	for i in cell_count():
-		if kinds[i] != M3.KEY:
+		if kinds[i] != kind:
 			continue
 		var below := i + width
 		if below >= cell_count() or is_fixed(below):
@@ -294,7 +309,10 @@ func refill() -> Array[Vector2i]:
 		if not is_open(i) or is_occupied(i):
 			continue
 		# Item rolls only happen on item levels so plain levels keep their random sequence.
-		if sacks_to_spawn > 0 and i < width and sacks < MAX_SACKS_ON_BOARD and spawn_rng.randf() < SACK_CHANCE:
+		if dishes_to_spawn > 0 and i < width:
+			kinds[i] = M3.DISH
+			dishes_to_spawn -= 1
+		elif sacks_to_spawn > 0 and i < width and sacks < MAX_SACKS_ON_BOARD and spawn_rng.randf() < SACK_CHANCE:
 			kinds[i] = M3.SACK
 			sacks_to_spawn -= 1
 			sacks += 1
@@ -336,6 +354,7 @@ func shuffle() -> void:
 			return
 	sacks_to_spawn += count_sacks()
 	keys_to_spawn += count_keys()
+	dishes_to_spawn += count_dishes()
 	generate()
 
 

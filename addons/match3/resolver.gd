@@ -117,8 +117,11 @@ func _drop_and_refill(board: M3Board, steps: Array) -> void:
 			steps.append({"type": M3.STEP_FALL, "moves": moves})
 		var collected := board.collect_sacks()
 		var keys := board.collect_keys()
-		if collected.is_empty() and keys.is_empty():
+		var dishes := board.collect_landed(M3.DISH)
+		if collected.is_empty() and keys.is_empty() and dishes.is_empty():
 			break
+		if not dishes.is_empty():
+			steps.append({"type": M3.STEP_COLLECT, "cells": dishes, "dish": true})
 		if not collected.is_empty():
 			steps.append({"type": M3.STEP_COLLECT, "cells": collected})
 		if not keys.is_empty():

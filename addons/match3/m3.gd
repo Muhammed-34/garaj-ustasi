@@ -16,6 +16,8 @@ const SACK := 9
 # A key is an item like the sack; it is collected once it cannot fall any further and opens a cage.
 # It sits below SACK so it never collides with the M3.GOAL_* keys that share the texture index space.
 const KEY := 8
+# A finished order's dish: an item that is served once it cannot fall any further.
+const DISH := 7
 const SLEEPER_HP := 3
 
 # Goal keys beyond tile kinds.
@@ -45,6 +47,8 @@ const STEP_STAGE := &"stage"
 const STEP_CATCH := &"catch"
 const STEP_RUN := &"run"
 const STEP_BELT := &"belt"
+const STEP_ORDER := &"order"
+const STEP_PATIENCE := &"patience"
 
 const BOOSTER_SINGLE := &"single"
 const BOOSTER_ROW := &"row"
@@ -52,9 +56,9 @@ const BOOSTER_SHUFFLE := &"shuffle"
 
 
 static func is_matchable(kind: int) -> bool:
-	return kind > EMPTY and kind < KEY
+	return kind > EMPTY and kind < DISH
 
 
 # Items never match or explode and travel down the board to be collected.
 static func is_item(kind: int) -> bool:
-	return kind == SACK or kind == KEY
+	return kind == SACK or kind == KEY or kind == DISH

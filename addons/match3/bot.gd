@@ -44,6 +44,7 @@ func _score(before: M3Session, after: M3Session) -> float:
 		progress += before.goals[kind] - int(after.goals.get(kind, 0))
 	if after.stage > before.stage:
 		progress += 10
+	progress += _order_progress(before, after)
 	var specials := 0
 	for special in after.board.specials:
 		if special != M3.Special.NONE:
@@ -52,16 +53,27 @@ func _score(before: M3Session, after: M3Session) -> float:
 	return progress * 10.0 + specials * 4.0 + obstacle_hits * 3.0 + _sack_depth(after) - _sack_depth(before)
 
 
-# Rows travelled by all sacks; a collected sack counts as having travelled the whole board,
-# so removing it at the bottom never looks like lost progress.
+# Ingredient steps count like goals; finishing an order and serving its dish are each worth ten.
+func _order_progress(before: M3Session, after: M3Session) -> int:
+	var total := 0
+	for n in before.orders.size():
+		var old: Dictionary = before.orders[n]
+		var now: Dictionary = after.orders[n]
+		for kind in old.need:
+			total += int(old.need[kind]) - int(now.need.get(kind, 0))
+		total += (int(now.state) - int(old.state)) * 10
+	return total
+
+
+# Rows travelled by all items; a collected sack or key and a served dish count as having travelled the
+# whole board, so removing them at the bottom never looks like lost progress.
 func _sack_depth(session: M3Session) -> float:
 	var board := session.board
 	var total := session.level.sacks + session.level.keys
-	if total == 0:
+	if total == 0 and session.orders.is_empty():
 		return 0.0
-	var on_board := board.count_sacks() + board.count_keys()
-	var collected := total - on_board - board.sacks_to_spawn - board.keys_to_spawn
-	var depth := float(collected * board.height)
+	var collected := total - board.count_sacks() - board.count_keys() - board.sacks_to_spawn - board.keys_to_spawn
+	var depth := float((collected + session.served_count()) * board.height)
 	for i in board.cell_count():
 		if M3.is_item(board.kinds[i]):
 			depth += board.pos(i).y

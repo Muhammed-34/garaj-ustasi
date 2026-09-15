@@ -1,6 +1,9 @@
 class_name M3Session
 extends RefCounted
 
+const ORDER_COOKING := 0
+const ORDER_READY := 1
+const ORDER_SERVED := 2
 const BLOCK_GOALS := {M3.Block.BOX: M3.GOAL_BOX, M3.Block.KNOT: M3.GOAL_KNOT, M3.Block.CRATE: M3.GOAL_KITTEN, M3.Block.SLEEPER: M3.GOAL_SLEEPER, M3.Block.FUR: M3.GOAL_FUR, M3.Block.CAGE: M3.GOAL_CAGE}
 
 var level: M3LevelDef
@@ -16,6 +19,10 @@ var stage := 1
 # (they sit on the board from the start); tile clears do not, or the second stage would be free.
 var _pending := {}
 var _pending_totals := {}
+# Restaurant orders: each is {"dish", "need", "total", "patience", "max_patience", "state"}.
+# Ingredients go to the first cooking order that needs them; a finished order drops its dish onto the
+# board, and the dish is served once it cannot fall any further. Unserved orders lose patience each swap.
+var orders: Array = []
 
 
 func _init(level_def: M3LevelDef, generate_board: bool = true) -> void:
@@ -33,6 +40,12 @@ func _init(level_def: M3LevelDef, generate_board: bool = true) -> void:
 	for kind in level.goals_2:
 		_pending[kind] = level.goals_2[kind]
 		_pending_totals[kind] = level.goals_2[kind]
+	for order in level.orders:
+		var need := {}
+		for kind in order.get("goals", {}):
+			need[int(kind)] = int(order.goals[kind])
+		var patience := int(order.get("patience", level.moves))
+		orders.append({"dish": str(order.get("dish", "")), "need": need, "total": need.duplicate(), "patience": patience, "max_patience": patience, "state": ORDER_COOKING})
 	_refresh_priority()
 
 
@@ -45,6 +58,7 @@ func clone() -> M3Session:
 	copy.stage = stage
 	copy._pending = _pending.duplicate()
 	copy._pending_totals = _pending_totals.duplicate()
+	copy.orders = orders.duplicate(true)
 	copy._refresh_priority()
 	return copy
 
@@ -62,6 +76,8 @@ func swap(a: Vector2i, b: Vector2i) -> Array:
 		_spread(steps)
 		_run_mice(steps)
 		_convey(steps)
+	if not is_won():
+		_tick_patience(steps)
 	return steps
 
 
@@ -208,6 +224,82 @@ func _convey(steps: Array) -> void:
 	steps.append_array(belt_steps)
 
 
+func _tick_patience(steps: Array) -> void:
+	if orders.is_empty():
+		return
+	var values := PackedInt32Array()
+	for order in orders:
+		if order.state != ORDER_SERVED:
+			order.patience = maxi(int(order.patience) - 1, 0)
+		values.append(order.patience)
+	steps.append({"type": M3.STEP_PATIENCE, "patience": values})
+
+
+# Serves ready orders for dishes that reached the bottom, then drops a dish for every order whose
+# ingredients are complete.
+func _update_orders(steps: Array, served: int) -> void:
+	for n in orders.size():
+		var order: Dictionary = orders[n]
+		if served > 0 and order.state == ORDER_READY:
+			order.state = ORDER_SERVED
+			served -= 1
+			steps.append({"type": M3.STEP_ORDER, "order": n, "state": ORDER_SERVED})
+	var placed := false
+	for n in orders.size():
+		var order: Dictionary = orders[n]
+		if order.state != ORDER_COOKING or not _order_complete(order):
+			continue
+		order.state = ORDER_READY
+		var cell := _place_dish()
+		placed = placed or cell >= 0
+		steps.append({"type": M3.STEP_ORDER, "order": n, "state": ORDER_READY, "cell": cell})
+	if placed and not M3MoveFinder.has_move(board):
+		board.shuffle()
+		steps.append({"type": M3.STEP_SHUFFLE, "kinds": board.kinds.duplicate(), "specials": board.specials.duplicate()})
+
+
+func _order_complete(order: Dictionary) -> bool:
+	for kind in order.need:
+		if int(order.need[kind]) > 0:
+			return false
+	return true
+
+
+# The dish replaces a plain tile at the top of a random column, or waits for the next refill.
+func _place_dish() -> int:
+	var options := PackedInt32Array()
+	for x in board.width:
+		for y in board.height:
+			var i := y * board.width + x
+			if board.is_hole(i):
+				continue
+			if board.blockers[i] == M3.Block.NONE and M3.is_matchable(board.kinds[i]) and board.specials[i] == M3.Special.NONE and board.mice[i] == 0:
+				options.append(i)
+			break
+	if options.is_empty():
+		board.dishes_to_spawn += 1
+		return -1
+	var cell := options[board.spawn_rng.randi_range(0, options.size() - 1)]
+	board.kinds[cell] = M3.DISH
+	return cell
+
+
+func _count_for_order(kind: int) -> bool:
+	for order in orders:
+		if order.state == ORDER_COOKING and int(order.need.get(kind, 0)) > 0:
+			order.need[kind] -= 1
+			return true
+	return false
+
+
+func served_count() -> int:
+	var count := 0
+	for order in orders:
+		if order.state == ORDER_SERVED:
+			count += 1
+	return count
+
+
 func add_moves(amount: int) -> void:
 	moves_left += amount
 
@@ -222,11 +314,21 @@ func is_won() -> bool:
 	for kind in goals:
 		if goals[kind] > 0:
 			return false
+	for order in orders:
+		if order.state != ORDER_SERVED:
+			return false
 	return true
 
 
 func is_lost() -> bool:
-	return moves_left <= 0 and not is_won()
+	if is_won():
+		return false
+	if moves_left <= 0:
+		return true
+	for order in orders:
+		if order.state != ORDER_SERVED and int(order.patience) <= 0:
+			return true
+	return false
 
 
 func is_finished() -> bool:
@@ -234,7 +336,11 @@ func is_finished() -> bool:
 
 
 func _track_goals(steps: Array) -> void:
+	var served := 0
 	for step in steps:
+		if step.type == M3.STEP_COLLECT and step.get("dish", false):
+			served += step.cells.size()
+			continue
 		if step.type == M3.STEP_CLEAR:
 			for kind in step.kinds:
 				_count_goal(kind)
@@ -252,6 +358,7 @@ func _track_goals(steps: Array) -> void:
 			for n in step.cells.size():
 				if step.hp[n] == 0:
 					_count_goal(BLOCK_GOALS[step.blocks[n]])
+	_update_orders(steps, served)
 	steps.append({"type": M3.STEP_GOAL, "remaining": goals.duplicate()})
 	if _advance_stage():
 		steps.append({"type": M3.STEP_STAGE, "stage": stage, "goals": goals.duplicate()})
@@ -260,6 +367,8 @@ func _track_goals(steps: Array) -> void:
 
 
 func _count_goal(key: int) -> void:
+	if key < M3.DISH and _count_for_order(key):
+		return
 	if goals.has(key) and goals[key] > 0:
 		goals[key] -= 1
 	elif stage < stage_count() and key > M3.SACK and int(_pending.get(key, 0)) > 0:
@@ -286,4 +395,10 @@ func _refresh_priority() -> void:
 	for kind in goals:
 		if goals[kind] > 0:
 			active.append(kind)
+	for order in orders:
+		if order.state != ORDER_COOKING:
+			continue
+		for kind in order.need:
+			if int(order.need[kind]) > 0 and not active.has(kind):
+				active.append(kind)
 	resolver.priority_kinds = active

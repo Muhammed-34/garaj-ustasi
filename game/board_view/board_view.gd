@@ -6,6 +6,8 @@ signal cell_tapped(cell: Vector2i)
 signal tile_cleared(kind: int, global_pos: Vector2)
 signal goals_changed(remaining: Dictionary)
 signal stage_changed(stage: int)
+signal order_changed(order: int, state: int)
+signal patience_changed(values: PackedInt32Array)
 signal combo(count: int)
 signal special_created(special: int)
 signal touched
@@ -267,6 +269,10 @@ func play(steps: Array) -> void:
 			await _play_run(step)
 		elif step.type == M3.STEP_BELT:
 			await _play_belt(step)
+		elif step.type == M3.STEP_ORDER:
+			await _play_order(step)
+		elif step.type == M3.STEP_PATIENCE:
+			patience_changed.emit(step.patience)
 		elif step.type == M3.STEP_GOAL:
 			goals_changed.emit(step.remaining)
 	if not tiles_match_board():
@@ -725,6 +731,20 @@ func _play_run(step: Dictionary) -> void:
 
 
 # Belt tiles slide one cell; a tile that wraps to the start of its run pops in there instead.
+# A finished order turns a top tile into its dish with a pop; a served order only notifies the screen.
+func _play_order(step: Dictionary) -> void:
+	order_changed.emit(step.order, step.state)
+	var cell: int = step.get("cell", -1)
+	if cell < 0 or _tiles[cell] == null:
+		return
+	var tile: TileView = _tiles[cell]
+	tile.setup(M3.DISH, M3.Special.NONE, _texture_for(M3.DISH), _cell)
+	_sfx(&"special")
+	if animate:
+		tile.scale = Vector2(1.5, 1.5)
+		await create_tween().tween_property(tile, "scale", Vector2.ONE, _d(0.25)).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT).finished
+
+
 func _play_belt(step: Dictionary) -> void:
 	var carried: Array[TileView] = []
 	for move: Vector2i in step.moves:
@@ -785,7 +805,8 @@ func _play_spread(step: Dictionary) -> void:
 
 # Sacks count as goals when collected; a key only turns in its lock (the cage it opens follows).
 func _play_collect(step: Dictionary) -> void:
-	var is_key: bool = step.get("key", false)
+	# Keys and dishes are not goals themselves; the cage or order they complete reports progress.
+	var is_key: bool = step.get("key", false) or step.get("dish", false)
 	var cells: PackedInt32Array = step.cells
 	_sfx(&"coin" if is_key else &"sack")
 	var tween: Tween = null

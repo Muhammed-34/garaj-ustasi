@@ -17,5 +17,7 @@ extends Resource
 @export_range(0, 40) var sacks := 0
 # Keys dropped during the level; each collected key opens one cage.
 @export_range(0, 40) var keys := 0
+# Restaurant orders: [{"dish": String, "goals": {tile kind: count}, "patience": moves}]. Empty means none.
+@export var orders: Array[Dictionary] = []
 # Mechanic introduced on this level, shown once before play.
 @export var intro := ""
