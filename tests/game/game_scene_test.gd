@@ -26,6 +26,13 @@ func _game() -> Control:
 	return game
 
 
+# Completes every goal and serves every table, so the next end check wins.
+func _finish(game: Control) -> void:
+	game.session.goals.clear()
+	for order in game.session.orders:
+		order.state = M3Session.ORDER_SERVED
+
+
 func _lose(game: Control) -> void:
 	game.session.moves_left = 0
 	game._check_end()
@@ -57,7 +64,7 @@ func test_retrying_a_lost_level_empties_a_bowl() -> void:
 	await _play_one_move(game)
 	_lose(game)
 	assert_int(_progress.bowls()).is_equal(MetaRules.MAX_BOWLS)
-	assert_str(game._end_detail.text).contains("kap boşalır")
+	assert_str(game._end_detail.text).contains("çay eksilir")
 	game._on_primary()
 	assert_int(_progress.bowls()).is_equal(MetaRules.MAX_BOWLS - 1)
 	assert_int(game.session.moves_left).is_equal(game.level.moves)
@@ -69,7 +76,7 @@ func test_coin_continue_that_wins_costs_no_bowl() -> void:
 	await _play_one_move(game)
 	_lose(game)
 	game._on_coin_continue()
-	game.session.goals.clear()
+	_finish(game)
 	game.session.moves_left = 0
 	game._check_end()
 	assert_int(_progress.bowls()).is_equal(MetaRules.MAX_BOWLS)
@@ -81,7 +88,7 @@ func test_replaying_a_won_level_on_the_last_bowl_is_free() -> void:
 		_progress.spend_bowl()
 	var game := _game()
 	await _play_one_move(game)
-	game.session.goals.clear()
+	_finish(game)
 	game.session.moves_left = 0
 	game._check_end()
 	assert_str(str(game.end_state())).is_equal("win")
@@ -103,9 +110,61 @@ func test_restarting_after_a_move_costs_a_bowl() -> void:
 	var game := _game()
 	await _play_one_move(game)
 	game.open_pause()
-	assert_str(game._pause_note.text).contains("mama kabı")
+	assert_str(game._pause_note.text).contains("çay eksilir")
 	game._on_pause_restart()
 	assert_int(_progress.bowls()).is_equal(MetaRules.MAX_BOWLS - 1)
+
+
+func _order_game(orders: Array) -> Control:
+	var game := _game()
+	# Replace the level's own orders and goals so each test controls every table.
+	game.level.orders.clear()
+	game.level.goals.clear()
+	for order in orders:
+		game.level.orders.append(order)
+	game.session = M3Session.new(game.level)
+	game.board_view.setup(game.session.board)
+	game._build_orders()
+	game._build_goals()
+	game._refresh_goals(game.session.goals)
+	return game
+
+
+func test_order_cards_show_tables_ingredients_and_patience() -> void:
+	var game := _order_game([{"dish": "menemen", "goals": {1: 4, 2: 2}, "patience": 12}, {"dish": "coban", "goals": {4: 3}, "patience": 9}])
+	assert_int(game._order_cards.size()).is_equal(2)
+	assert_str(game._order_cards[0].card.get_child(0).get_child(1).get_child(0).text).is_equal("MASA 1 · Menemen")
+	assert_str(game._order_cards[0].items[1].count.text).is_equal("0/4")
+	assert_str(game._order_cards[1].patience.text).is_equal("9")
+	game.session.orders[0].need[1] = 1
+	game.session.orders[1].patience = 2
+	game._refresh_orders()
+	assert_str(game._order_cards[0].items[1].count.text).is_equal("3/4")
+	assert_object(game._order_cards[1].patience.get_theme_color("font_color")).is_equal(UiKit.DANGER)
+
+
+func test_served_order_shows_on_its_card_and_wins_with_its_dish() -> void:
+	var game := _order_game([{"dish": "omlet", "goals": {3: 1}, "patience": 20}])
+	game.session.orders[0].need[3] = 0
+	game.session.orders[0].state = M3Session.ORDER_SERVED
+	game._refresh_orders()
+	assert_str(game._order_cards[0].status.text).is_equal("Servis edildi")
+	game.session.moves_left = 0
+	game._check_end()
+	assert_str(str(game.end_state())).is_equal("win")
+	assert_str(game._end_title.text).is_equal("Peynirli Omlet hazır!")
+
+
+func test_table_running_out_of_patience_explains_the_loss() -> void:
+	_progress.data.coins = 300
+	var game := _order_game([{"dish": "menemen", "goals": {1: 99}, "patience": 1}])
+	game.session.orders[0].patience = 0
+	game._check_end()
+	assert_str(game._end_title.text).is_equal("Müşteri kalktı")
+	assert_str(game._end_detail.text).contains("Masa 1")
+	game._on_coin_continue()
+	assert_int(game.session.orders[0].patience).is_equal(_progress.CONTINUE_MOVES)
+	assert_bool(game.session.is_finished()).is_false()
 
 
 func test_game_knows_when_every_bowl_is_empty() -> void:
@@ -122,7 +181,7 @@ func test_using_a_booster_starts_the_attempt() -> void:
 	await game._use_booster(M3.BOOSTER_SHUFFLE, Vector2i.ZERO)
 	assert_int(int(_progress.data.bowls.open_level)).is_equal(1)
 	game.open_pause()
-	assert_str(game._pause_note.text).contains("mama kabı")
+	assert_str(game._pause_note.text).contains("çay eksilir")
 	game.fail_attempt()
 	assert_int(_progress.bowls()).is_equal(MetaRules.MAX_BOWLS - 1)
 
@@ -195,27 +254,15 @@ func test_leaving_the_app_pauses_the_game() -> void:
 
 func test_pause_is_not_offered_after_the_level_ends() -> void:
 	var game := _game()
-	game.session.goals.clear()
+	_finish(game)
 	game.session.moves_left = 0
 	game._check_end()
 	game.open_pause()
 	assert_bool(game.pause_visible()).is_false()
 
 
-func test_goal_card_total_grows_when_fur_spreads() -> void:
-	_router.params = {"level_id": 74}
-	_progress.data.intros_seen.append("fur")
-	var game := _game()
-	var start: int = game.level.goals[M3.GOAL_FUR]
-	game.session.goals[M3.GOAL_FUR] += 1
-	game.session.goal_totals[M3.GOAL_FUR] += 1
-	game._refresh_goals(game.session.goals)
-	assert_str(game._goal_items[M3.GOAL_FUR].count.text).is_equal("0 / %d" % (start + 1))
-	assert_float(game._goal_items[M3.GOAL_FUR].bar.max_value).is_equal(float(start + 1))
-
-
 func test_shaped_board_view_stays_in_sync_after_a_move() -> void:
-	_router.params = {"level_id": 86}
+	_router.params = {"level_id": 54}
 	var game := _game()
 	assert_bool(game.session.board.has_holes()).is_true()
 	assert_int(game.board_view.block_sprite_count()).is_equal(0)
@@ -224,33 +271,8 @@ func test_shaped_board_view_stays_in_sync_after_a_move() -> void:
 	assert_int(game.board_view.resyncs).is_equal(0)
 
 
-func test_second_stage_replaces_the_goal_cards() -> void:
-	_router.params = {"level_id": 96}
-	_progress.data.intros_seen.append("stages")
-	var game := _game()
-	assert_bool(game._goal_items.has(M3.GOAL_BOX)).is_true()
-	for kind in game.session.goals:
-		game.session.goals[kind] = 0
-	assert_bool(game.session._advance_stage()).is_true()
-	game._on_stage_changed(2)
-	assert_bool(game._goal_items.has(M3.GOAL_BOX)).is_false()
-	assert_bool(game._goal_items.has(3)).is_true()
-	assert_str(game._goal_items[3].count.text).is_equal("0 / %d" % game.level.goals_2[3])
-	assert_bool(game._combo_label.visible).is_true()
-	assert_str(game._combo_label.text).is_equal("İkinci hedef!")
-	await get_tree().create_timer(0.9).timeout
-	assert_bool(game._combo_label.visible).override_failure_message("announcement gone before it could be read").is_true()
-
-
-func test_lose_text_mentions_the_unopened_second_stage() -> void:
-	_router.params = {"level_id": 96}
-	_progress.data.intros_seen.append("stages")
-	var game := _game()
-	assert_str(game._goals_left_text()).contains("ikinci hedef")
-
-
 func test_mice_view_stays_in_sync_after_a_move() -> void:
-	_router.params = {"level_id": 123}
+	_router.params = {"level_id": 45}
 	var game := _game()
 	assert_int(game.board_view.mouse_sprite_count()).is_equal(game.session.board.mice.count(1))
 	await _play_one_move(game)
@@ -293,7 +315,7 @@ func test_idle_player_gets_a_hint() -> void:
 
 func test_winning_records_progress_and_shows_stars() -> void:
 	var game := _game()
-	game.session.goals.clear()
+	_finish(game)
 	game.session.moves_left = 0
 	game._check_end()
 	assert_str(str(game.end_state())).is_equal("win")
@@ -303,10 +325,10 @@ func test_winning_records_progress_and_shows_stars() -> void:
 	assert_str(game._primary.text).is_equal("Devam")
 
 
-func test_leftover_moves_throw_a_cat_party() -> void:
+func test_leftover_moves_throw_a_kitchen_party() -> void:
 	var game := _game()
 	game.board_view.animate = false
-	game.session.goals.clear()
+	_finish(game)
 	game.session.moves_left = 4
 	await game._on_won()
 	assert_str(str(game.end_state())).is_equal("win")
@@ -316,14 +338,18 @@ func test_leftover_moves_throw_a_cat_party() -> void:
 	assert_bool(game.board_view.tiles_match_board()).is_true()
 
 
-func test_rescue_level_win_leads_to_the_new_cat() -> void:
-	_router.params = {"level_id": MetaRules.RESCUE_LEVELS[0]}
+func test_first_win_on_a_recipe_level_adds_it_to_the_book() -> void:
+	_router.params = {"level_id": MetaRules.recipe_unlock_level(1)}
 	var game := _game()
-	game.session.goals.clear()
+	_finish(game)
 	game.session.moves_left = 0
 	game._check_end()
-	assert_bool(game.rescue_pending()).is_true()
-	assert_str(game._primary.text).is_equal("Yeni dostla tanış")
+	assert_str(game._end_detail.text).contains("Çoban Salatası tarif defterine eklendi")
+	var again := _game()
+	_finish(again)
+	again.session.moves_left = 0
+	again._check_end()
+	assert_str(again._end_detail.text).not_contains("tarif defterine")
 
 
 func test_losing_offers_coin_continue_only_when_affordable() -> void:

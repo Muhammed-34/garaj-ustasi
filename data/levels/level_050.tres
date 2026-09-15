@@ -5,12 +5,15 @@
 [resource]
 script = ExtResource("1_nfu4b")
 id = 50
-moves = 22
-goals = Dictionary[int, int]({
-2: 18,
-12: 4,
-13: 8
-})
+moves = 18
 rng_seed = 1050
-layout = PackedStringArray(".......", ".......", "K.K.K.K", ".......", "K.K.K.K", ".......", ".......")
-sacks = 4
+layout = PackedStringArray(".......", ".......", ".......", ">>>>>>>", ".......", ".......", ".......")
+orders = Array[Dictionary]([{
+"dish": "menemen",
+"goals": {
+1: 10,
+3: 10
+},
+"patience": 18
+}])
+intro = "belt"

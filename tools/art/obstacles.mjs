@@ -15,7 +15,79 @@ export const OBSTACLE_DEFS = [
   lg('ob-metal', [[0, '#eef2f6'], [1, '#8b95a2']], 1, 0),
   lg('ob-gold', [[0, '#ffe27a'], [1, '#d19a1c']]),
   lg('ob-mouse', [[0, '#e1e4e9'], [1, '#9aa2ad']]),
+  lg('ob-plate', [[0, '#ffffff'], [1, '#ddd5c9']]),
+  lg('ob-cloche', [[0, '#f7f9fb'], [0.55, '#c9d0d8'], [1, '#8e97a2']], 1, 0),
+  lg('ob-pan', [[0, '#4a4440'], [1, '#1f1b19']]),
+  lg('ob-ice', [[0, '#e6f7ff'], [1, '#9fd6f2']]),
+  lg('ob-tea', [[0, '#e0532c'], [1, '#8a1f0e']]),
 ].join('');
+
+// A tulip glass of tea on a saucer: the recipe game's lives on the map.
+const TEA =
+  '<ellipse cx="24" cy="45" rx="16" ry="2.4" fill="url(#gs)"/>' +
+  '<ellipse cx="24" cy="41" rx="16" ry="4.2" fill="#d9442f" filter="url(#ds)"/>' +
+  '<ellipse cx="24" cy="40.3" rx="12" ry="2.8" fill="#f07a5f"/>' +
+  '<path d="M16.5 15h15c-.8 4-3.5 6.5-3.5 9s3.5 7.5 3.5 12c0 2.5-3 4-7.5 4s-7.5-1.5-7.5-4c0-4.5 3.5-9.5 3.5-12s-2.7-5-3.5-9z" fill="url(#ob-tea)"/>' +
+  '<path d="M14 9h20c0 6-4 10-4 15s4 8 4 12.5c0 3-4 5-10 5s-10-2-10-5c0-4.5 4-7.5 4-12.5s-4-9-4-15z" fill="#ffffff" fill-opacity="0.25" stroke="#efe7dc" stroke-width="1.4"/>' +
+  '<path d="M18 12c.5 4 3 7 3 11" stroke="#ffffff" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.8"/>' +
+  '<path d="M21 6c-2-2.5 2-3.5 0-6M27 6c-2-2.5 2-3.5 0-6" stroke="#b3a595" stroke-width="1.3" fill="none" stroke-linecap="round" opacity="0.6"/>';
+
+// Kitchen obstacles for Tarif Mutfağı. They keep the sprite names the board view already uses:
+// box = dirty plates, crate = burnt pan, knot = frozen food (ice over the tile), paw_print = spilled flour.
+
+// A stack of dirty plates; more plates take more hits.
+const plates = (count) => {
+  let s = '<ellipse cx="24" cy="45" rx="20" ry="2.6" fill="url(#gs)"/>';
+  for (let k = 0; k < count; k++) {
+    const y = 38 - k * 6.5;
+    s += `<ellipse cx="24" cy="${y + 2.2}" rx="20" ry="6" fill="#b8ad9f"/>`;
+    s += `<ellipse cx="24" cy="${y}" rx="20" ry="6" fill="url(#ob-plate)"${k === 0 ? ' filter="url(#ds)"' : ''}/>`;
+  }
+  const top = 38 - (count - 1) * 6.5;
+  s += `<ellipse cx="24" cy="${top}" rx="12.5" ry="3.6" fill="#e9e1d5"/>`;
+  s += `<path d="M15 ${top - 1}q4-3 9-1t8 1" stroke="#b5542d" stroke-width="2.6" fill="none" stroke-linecap="round" opacity="0.8"/>`;
+  s += `<circle cx="30" cy="${top + 1.5}" r="1.6" fill="#8a5a2c" opacity="0.8"/><circle cx="19" cy="${top + 2}" r="1.1" fill="#6f9a3a" opacity="0.9"/>`;
+  s += `<path d="M8 ${top - 1.5}q3-2.5 7-3" stroke="#ffffff" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.8"/>`;
+  return s;
+};
+
+// A burnt frying pan; the two-hit version smokes and is fully charred.
+const burntPan = (heavy) =>
+  '<ellipse cx="22" cy="44.5" rx="19" ry="2.6" fill="url(#gs)"/>' +
+  '<path d="M34 27l12-5" stroke="#2a2420" stroke-width="5" stroke-linecap="round"/>' +
+  '<ellipse cx="20" cy="32" rx="18" ry="11" fill="url(#ob-pan)" filter="url(#ds)"/>' +
+  '<ellipse cx="20" cy="30" rx="14.5" ry="8" fill="#171311"/>' +
+  (heavy
+    ? '<path d="M9 31q3-4 7-2t7-1 7 2" stroke="#4a3526" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+      '<circle cx="14" cy="27" r="2.2" fill="#3a2a1e"/><circle cx="25" cy="33" r="2.6" fill="#3a2a1e"/><circle cx="29" cy="27.5" r="1.6" fill="#4a3526"/>' +
+      '<path d="M13 19c-3-4 3-6 0-10M21 18c-3-4 3-6 0-10M29 19c-3-4 3-6 0-10" stroke="#8f8983" stroke-width="2.2" fill="none" stroke-linecap="round" opacity="0.75"/>'
+    : '<circle cx="16" cy="30" r="1.8" fill="#3a2a1e"/><circle cx="25" cy="31.5" r="1.4" fill="#3a2a1e"/>' +
+      '<path d="M10 28q5-4 12-4" stroke="#ffffff" stroke-width="1.6" fill="none" stroke-linecap="round" opacity="0.45"/>') +
+  '<path d="M6 28q4-7 12-8" stroke="#ffffff" stroke-width="1.4" fill="none" stroke-linecap="round" opacity="0.35"/>';
+
+// Ice over the tile; the tile still shows through so the player sees what is frozen.
+const ICE =
+  '<rect x="3" y="3" width="42" height="42" rx="8" fill="url(#ob-ice)" opacity="0.5"/>' +
+  '<rect x="3" y="3" width="42" height="42" rx="8" fill="none" stroke="#f2fbff" stroke-width="2.6" opacity="0.95"/>' +
+  '<path d="M9 14l9-7M9 23l16-14M31 41l9-7" stroke="#ffffff" stroke-width="2" stroke-linecap="round" opacity="0.8"/>' +
+  '<path d="M39 9v6M36 12h6M37 10l4 4M41 10l-4 4" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round"/>';
+
+// Spilled flour under the tile: soft white patches and specks.
+const FLOUR =
+  '<rect x="2" y="2" width="44" height="44" rx="8" fill="#fff9ee" opacity="0.6"/>' +
+  '<circle cx="15" cy="16" r="9" fill="#ffffff" opacity="0.85"/><circle cx="31" cy="30" r="12" fill="#ffffff" opacity="0.8"/>' +
+  '<circle cx="12" cy="34" r="6" fill="#ffffff" opacity="0.75"/><circle cx="34" cy="12" r="5" fill="#ffffff" opacity="0.7"/>' +
+  '<g fill="#e8dcc6"><circle cx="22" cy="10" r="1"/><circle cx="41" cy="22" r="1.2"/><circle cx="7" cy="25" r="0.9"/><circle cx="24" cy="41" r="1.1"/></g>';
+
+// A finished dish under a silver cloche, travelling down the board to be served.
+const DISH_ITEM =
+  '<ellipse cx="24" cy="43.5" rx="18" ry="2.6" fill="url(#gs)"/>' +
+  '<ellipse cx="24" cy="37" rx="21" ry="5.2" fill="url(#ob-plate)" filter="url(#ds)"/>' +
+  '<path d="M6.5 36a17.5 17.5 0 0 1 35 0z" fill="url(#ob-cloche)"/>' +
+  '<path d="M6.5 36h35" stroke="#7d8691" stroke-width="1.6"/>' +
+  '<rect x="21" y="14.5" width="6" height="4" rx="2" fill="#aab2bb"/><circle cx="24" cy="14" r="3" fill="#dfe4ea"/>' +
+  '<path d="M12.5 31q1.5-8 9-11.5" stroke="#ffffff" stroke-width="2.4" fill="none" stroke-linecap="round" opacity="0.85"/>' +
+  '<path d="M38 8l1.2 3 3 1.2-3 1.2-1.2 3-1.2-3-3-1.2 3-1.2z" fill="#ffd34d"/>';
 
 // Conveyor belt cell: a dark rubber belt pointing right; "<" belts flip it in the view.
 // It is drawn under the tile, which covers the middle, so the direction arrows sit on the
@@ -144,13 +216,12 @@ const crateBase = (cracked) =>
   (cracked ? '<path d="M31 6l-3 6 4 3-3 5M9 44l4-6-3-3" stroke="#3a220e" stroke-width="1.6" fill="none" stroke-linejoin="round"/>' : '');
 
 export const OBSTACLES = {
-  box_1: boxBase,
-  box_2:
-    boxBase +
-    '<rect x="4" y="24" width="40" height="7" fill="url(#ob-tapeH)"/>' +
-    '<path d="M4 24h40M4 31h40" stroke="#b99b60" stroke-width="0.8" opacity="0.8"/>',
-  crate_2: crateBase(false),
-  crate_1: crateBase(true),
+  box_1: plates(2),
+  box_2: plates(4),
+  crate_2: burntPan(true),
+  crate_1: burntPan(false),
+  dish: DISH_ITEM,
+  tea: TEA,
   sleeper_3: sleeperBase(SLEEPING_EYES) + z(27, 12, 4) + z(33, 6, 5) + z(40, 1, 6),
   sleeper_2: sleeperBase(SLEEPING_EYES) + z(30, 10, 4.5) + z(37, 4, 5.5),
   sleeper_1: sleeperBase(WAKING_EYES) + z(34, 8, 4.5),
@@ -159,18 +230,8 @@ export const OBSTACLES = {
   key: KEY,
   mouse: MOUSE,
   belt: BELT,
-  knot:
-    '<path d="M3 13Q24 23 45 11" stroke="#5e3196" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.9"/>' +
-    '<path d="M3 13Q24 23 45 11" stroke="#caa6f2" stroke-width="2.2" fill="none" stroke-linecap="round"/>' +
-    '<path d="M4 38Q24 27 44 40" stroke="#5e3196" stroke-width="5" fill="none" stroke-linecap="round" opacity="0.9"/>' +
-    '<path d="M4 38Q24 27 44 40" stroke="#caa6f2" stroke-width="2.2" fill="none" stroke-linecap="round"/>' +
-    '<path d="M12 3Q19 24 10 45M36 3Q29 24 38 45" stroke="#5e3196" stroke-width="4.2" fill="none" stroke-linecap="round" opacity="0.85"/>' +
-    '<path d="M12 3Q19 24 10 45M36 3Q29 24 38 45" stroke="#dcc2f7" stroke-width="1.8" fill="none" stroke-linecap="round"/>' +
-    '<circle cx="39" cy="9" r="6.5" fill="url(#yarn)" filter="url(#ds)"/>' +
-    '<path d="M34 7q5 4 10 1M35 12q4-5 8-7" stroke="#5e3196" stroke-width="1.3" fill="none" opacity="0.8"/>',
-  paw_print:
-    '<rect x="2" y="2" width="44" height="44" rx="8" fill="#f2b3a0" opacity="0.6"/>' +
-    paw(24, 25, 1.45, '#d4735d', 0.7),
+  knot: ICE,
+  paw_print: FLOUR,
   sack:
     '<ellipse cx="24" cy="43.5" rx="15" ry="2.8" fill="url(#gs)"/>' +
     '<g filter="url(#ds)"><path d="M12.5 13c4-2.5 19-2.5 23 0l2 4c3 8 3.6 17 1.8 23-2 3-7.6 4-15.3 4S10.7 43 8.7 40c-1.8-6-1.2-15 1.8-23z" fill="url(#ob-sack)"/>' +

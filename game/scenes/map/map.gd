@@ -9,10 +9,10 @@ static var _calendar_offered_on := ""
 static var last_opened_level := 0
 
 var level_buttons: Array[Button] = []
-var shelter_button: Button
+var recipes_button: Button
 var gift_button: Button
 var calendar_cells: Array[PanelContainer] = []
-var rescue_markers := {}
+var recipe_markers := {}
 var bottom_button: Button
 var next_button: Button
 var home_button: Button
@@ -69,7 +69,7 @@ func _ready() -> void:
 	bowl_card.add_child(bowl_row)
 	for n in MetaRules.MAX_BOWLS:
 		var icon := TextureRect.new()
-		icon.texture = ArtAtlas.texture("tile_1")
+		icon.texture = ArtAtlas.texture("tea")
 		icon.custom_minimum_size = Vector2(52, 52)
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -99,7 +99,7 @@ func _ready() -> void:
 	finale_rows.add_theme_constant_override("separation", 10)
 	finale_card.add_child(finale_rows)
 	finale_rows.add_child(UiKit.centered_label("Tebrikler!", 48))
-	finale_rows.add_child(UiKit.centered_label("Bütün bölümleri bitirdin. Kediler sayende çok mutlu; yeni bölümler yolda!", 28, UiKit.MUTED))
+	finale_rows.add_child(UiKit.centered_label("Bütün bölümleri bitirdin. Müşteriler sayende çok mutlu; yeni tarifler yolda!", 28, UiKit.MUTED))
 	finale_card.visible = false
 	path.add_child(finale_card)
 	level_buttons.resize(Levels.COUNT)
@@ -114,12 +114,12 @@ func _ready() -> void:
 	var bottom := HBoxContainer.new()
 	bottom.add_theme_constant_override("separation", 14)
 	column.add_child(bottom)
-	shelter_button = UiKit.button("Barınak", 32, Vector2(0, 104), UiKit.INK, Color.WHITE, 52)
-	shelter_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	shelter_button.icon = ArtAtlas.texture("cat_tekir_face")
-	shelter_button.add_theme_constant_override("icon_max_width", 72)
-	shelter_button.pressed.connect(func() -> void: UiKit.go(&"shelter"))
-	bottom.add_child(shelter_button)
+	recipes_button = UiKit.button("Tarif Defteri", 32, Vector2(0, 104), Color("2f5240"), Color.WHITE, 52)
+	recipes_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	recipes_button.icon = ArtAtlas.texture("dish_menemen")
+	recipes_button.add_theme_constant_override("icon_max_width", 84)
+	recipes_button.pressed.connect(func() -> void: UiKit.go(&"recipes"))
+	bottom.add_child(recipes_button)
 	gift_button = UiKit.button("Hediye", 30, Vector2(220, 104), Color("ffe38a"), UiKit.INK, 52)
 	gift_button.pressed.connect(open_calendar)
 	bottom.add_child(gift_button)
@@ -182,9 +182,9 @@ func _refresh_bowls() -> void:
 	var wait := format_wait(progress.seconds_to_next_bowl())
 	for n in bowl_icons.size():
 		bowl_icons[n].modulate = Color.WHITE if n < count else Color(1, 1, 1, 0.25)
-	_bowl_label.text = "Mama kapları dolu" if count >= MetaRules.MAX_BOWLS else "Sıradaki kap %s" % wait
-	_bowls_wait_label.text = "Kediler karnını doyururken biraz bekle.\nSıradaki mama kabı %s sonra dolar." % wait
-	_refill_button.text = "Hepsini doldur · %d altın" % MetaRules.BOWL_REFILL_ALL_COST
+	_bowl_label.text = "Çaylar hazır" if count >= MetaRules.MAX_BOWLS else "Sıradaki çay %s" % wait
+	_bowls_wait_label.text = "Çay demlenirken biraz soluklan.\nSıradaki çay %s sonra hazır." % wait
+	_refill_button.text = "Hepsini demle · %d altın" % MetaRules.BOWL_REFILL_ALL_COST
 	_refill_button.disabled = progress.coins() < MetaRules.BOWL_REFILL_ALL_COST
 	coins_short_label.visible = _refill_button.disabled
 	coins_short_label.text = "Altının yetmiyor (%d / %d)" % [progress.coins(), MetaRules.BOWL_REFILL_ALL_COST]
@@ -194,9 +194,9 @@ func _refresh_bowls() -> void:
 
 func _build_bowls_popup() -> void:
 	_bowls_rows = UiKit.popup(self, 600.0)
-	_bowls_rows.add_child(UiKit.centered_label("Mama kapları boş", 46))
+	_bowls_rows.add_child(UiKit.centered_label("Çaylar bitti", 46))
 	var bowl := TextureRect.new()
-	bowl.texture = ArtAtlas.texture("tile_1")
+	bowl.texture = ArtAtlas.texture("tea")
 	bowl.custom_minimum_size = Vector2(0, 120)
 	bowl.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	bowl.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -222,13 +222,13 @@ func _build_bowl_lost_popup() -> void:
 	_bowl_lost_rows = UiKit.popup(self, 600.0)
 	_bowl_lost_rows.add_child(UiKit.centered_label("Yarım kalan bölüm", 44))
 	var bowl := TextureRect.new()
-	bowl.texture = ArtAtlas.texture("tile_1")
+	bowl.texture = ArtAtlas.texture("tea")
 	bowl.custom_minimum_size = Vector2(0, 110)
 	bowl.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	bowl.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	bowl.modulate = Color(1, 1, 1, 0.4)
 	_bowl_lost_rows.add_child(bowl)
-	_bowl_lost_rows.add_child(UiKit.centered_label("Bölümü yarıda bıraktığın için bir mama kabı boşaldı.", 28, UiKit.MUTED))
+	_bowl_lost_rows.add_child(UiKit.centered_label("Bölümü yarıda bıraktığın için bir çay eksildi.", 28, UiKit.MUTED))
 	var ok := UiKit.button("Tamam", 30, Vector2(0, 90), UiKit.ACCENT, Color.WHITE, 45)
 	ok.pressed.connect(func() -> void: UiKit.popup_root(_bowl_lost_rows).visible = false)
 	_bowl_lost_rows.add_child(ok)
@@ -337,16 +337,14 @@ func _level_row(id: int) -> Control:
 		var badge := UiKit.pill("Zor" if level.difficulty == 1 else "Çok zor", UiKit.DANGER, Color.WHITE, 22)
 		badge.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		node.add_child(badge)
-	if MetaRules.RESCUE_LEVELS.has(id):
-		var friend := TextureRect.new()
-		friend.texture = ArtAtlas.texture("cat_silhouette")
-		friend.custom_minimum_size = Vector2(76, 76)
-		friend.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		friend.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		friend.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-		friend.tooltip_text = "Bu bölümde bir dost seni bekliyor"
-		row.add_child(friend)
-		rescue_markers[id] = friend
+	if MetaRules.recipe_index_for_level(id) >= 0:
+		var recipe := TextureRect.new()
+		recipe.custom_minimum_size = Vector2(104, 78)
+		recipe.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		recipe.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		recipe.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		row.add_child(recipe)
+		recipe_markers[id] = recipe
 	level_buttons[id - 1] = button
 	_star_rows[id] = stars
 	return row
@@ -357,28 +355,18 @@ func _refresh() -> void:
 	_coins_label.text = "%d altın" % (progress.coins() if progress else 0)
 	_refresh_bowls()
 	if progress:
-		var extras := PackedStringArray()
-		if progress.next_pending_rescue_level() > 0:
-			extras.append("yeni dost!")
-		elif progress.unread_mail_count() > 0:
-			extras.append("mektup var")
-		shelter_button.text = "Barınak" + (" · " + extras[0] if not extras.is_empty() else "")
 		gift_button.modulate = Color.WHITE if progress.can_claim_calendar() else Color(1, 1, 1, 0.6)
 	finale_card.visible = all_levels_done()
 	var star_on := ArtAtlas.texture("star_on")
 	var star_off := ArtAtlas.texture("star_off")
-	# A rescue marker shows the friend's face once rescued, and the "?" silhouette until then.
-	var rescued: Array = progress.cats() if progress else []
-	for n in MetaRules.RESCUE_LEVELS.size():
-		var marker: TextureRect = rescue_markers.get(MetaRules.RESCUE_LEVELS[n])
+	# A recipe marker shows its dish once the level is won, and a covered plate until then.
+	for n in MetaRules.RECIPES.size():
+		var marker: TextureRect = recipe_markers.get(MetaRules.recipe_unlock_level(n))
 		if marker == null:
 			continue
-		if n < rescued.size():
-			marker.texture = ArtAtlas.texture("cat_%s_face" % rescued[n].breed)
-			marker.tooltip_text = str(rescued[n].name)
-		else:
-			marker.texture = ArtAtlas.texture("cat_silhouette")
-			marker.tooltip_text = "Bu bölümde bir dost seni bekliyor"
+		var unlocked: bool = progress != null and progress.is_recipe_unlocked(n)
+		marker.texture = ArtAtlas.texture(("dish_%s" % MetaRules.RECIPES[n].id) if unlocked else "dish_locked")
+		marker.tooltip_text = str(MetaRules.RECIPES[n].name) if unlocked else "Bu bölümde yeni bir tarif seni bekliyor"
 	for id in range(1, Levels.COUNT + 1):
 		var unlocked: bool = progress.is_unlocked(id) if progress else id == 1
 		var stars: int = progress.stars_for(id) if progress else 0

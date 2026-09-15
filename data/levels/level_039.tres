@@ -6,10 +6,23 @@
 script = ExtResource("1_co7hg")
 id = 39
 goals = Dictionary[int, int]({
-2: 20,
-12: 5
+14: 2
 })
 rng_seed = 1039
 difficulty = 1
-layout = PackedStringArray()
-sacks = 5
+layout = PackedStringArray(".......", ".......", ".C...C.", ".......", ".......", ".......", ".......")
+orders = Array[Dictionary]([{
+"dish": "imam",
+"goals": {
+1: 12,
+4: 12
+},
+"patience": 12
+}, {
+"dish": "gozleme",
+"goals": {
+4: 10,
+5: 12
+},
+"patience": 20
+}])

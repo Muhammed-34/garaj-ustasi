@@ -31,7 +31,7 @@ func test_every_rescue_uses_a_breed_with_art() -> void:
 
 func test_calendar_rewards_grow_and_end_with_a_booster() -> void:
 	assert_int(MetaRules.CALENDAR.size()).is_equal(7)
-	assert_str(MetaRules.reward_text(MetaRules.CALENDAR[6])).is_equal("300 altın + Lazer")
+	assert_str(MetaRules.reward_text(MetaRules.CALENDAR[6])).is_equal("300 altın + Oklava")
 
 
 func test_next_day_crosses_the_year() -> void:

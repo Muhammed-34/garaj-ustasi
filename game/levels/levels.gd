@@ -1,7 +1,7 @@
 class_name Levels
 extends RefCounted
 
-const COUNT := 140
+const COUNT := 60
 const PATH := "res://data/levels/level_%03d.tres"
 
 

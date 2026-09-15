@@ -5,10 +5,21 @@
 [resource]
 script = ExtResource("1_jbvv7")
 id = 52
-moves = 15
-goals = Dictionary[int, int]({
-14: 2
-})
+moves = 22
 rng_seed = 1052
-layout = PackedStringArray(".......", ".......", ".C...C.", ".......", ".......", ".......", ".......")
-intro = "kitten"
+layout = PackedStringArray(".......", ">>>>>>>", ".......", ".......", ".......", "<<<<<<<", ".......")
+orders = Array[Dictionary]([{
+"dish": "karniyarik",
+"goals": {
+1: 12,
+4: 12
+},
+"patience": 14
+}, {
+"dish": "coban",
+"goals": {
+2: 10,
+4: 10
+},
+"patience": 22
+}])

@@ -1,32 +1,34 @@
 extends Control
 
 const BOOSTERS := [
-	{"id": M3.BOOSTER_ROW, "label": "Lazer", "icon": "booster_row"},
-	{"id": M3.BOOSTER_SHUFFLE, "label": "Kedi nanesi", "icon": "booster_shuffle"},
-	{"id": M3.BOOSTER_SINGLE, "label": "Pençe", "icon": "booster_single"},
+	{"id": M3.BOOSTER_ROW, "label": "Oklava", "icon": "booster_row"},
+	{"id": M3.BOOSTER_SHUFFLE, "label": "Kepçe", "icon": "booster_shuffle"},
+	{"id": M3.BOOSTER_SINGLE, "label": "Bıçak", "icon": "booster_single"},
 ]
-const COMBO_WORDS := {3: "Harika!", 5: "Muhteşem!", 7: "Pati-stik!"}
+const COMBO_WORDS := {3: "Nefis!", 5: "Enfes!", 7: "Şef işi!"}
 const KIND_NAMES := {
-	1: "mama", 2: "yün", 3: "balık", 4: "pati", 5: "çıngırak",
-	M3.GOAL_BOX: "kutu", M3.GOAL_PAW: "pati izi", M3.GOAL_SACK: "mama çuvalı", M3.GOAL_KNOT: "yün düğümü", M3.GOAL_KITTEN: "yavru",
+	1: "domates", 2: "biber", 3: "yumurta", 4: "soğan", 5: "peynir",
+	M3.GOAL_BOX: "kirli tabak", M3.GOAL_PAW: "un lekesi", M3.GOAL_SACK: "un çuvalı", M3.GOAL_KNOT: "donmuş gıda", M3.GOAL_KITTEN: "yanık tava",
 	M3.GOAL_SLEEPER: "uyuyan kedi", M3.GOAL_FUR: "tüy yığını", M3.GOAL_CAGE: "kafes", M3.GOAL_MOUSE: "fare",
 }
 const GOAL_ART := {M3.GOAL_BOX: "box_1", M3.GOAL_PAW: "paw_print", M3.GOAL_SACK: "sack", M3.GOAL_KNOT: "knot", M3.GOAL_KITTEN: "crate_2", M3.GOAL_SLEEPER: "sleeper_3", M3.GOAL_FUR: "fur", M3.GOAL_CAGE: "cage", M3.GOAL_MOUSE: "mouse"}
 const INTROS := {
-	"basics": {"tile": [1, M3.Special.NONE], "title": "Hoş geldin!", "text": "Bir taşı yanındakiyle yer değiştir. Aynı türden 3 taş yan yana gelince patlar. Hedefteki taşları topla!"},
-	"line": {"tile": [4, M3.Special.LINE_H], "title": "4'lü eşleşme", "text": "Bir sırada 4 taş eşleştirirsen çizgili taş çıkar. Onu patlatınca bütün sıra temizlenir."},
-	"bomb": {"tile": [3, M3.Special.BOMB], "title": "L ve T şekli", "text": "Taşları L ya da T şeklinde eşleştirirsen bomba çıkar; patlayınca çevresini temizler."},
-	"flyer": {"tile": [2, M3.Special.FLYER], "title": "Kare eşleşme", "text": "2x2 kare eşleştir: kağıt uçak çıkar ve hedeflerinden birine uçup vurur."},
-	"color": {"tile": [0, M3.Special.COLOR], "title": "5'li eşleşme", "text": "Bir sırada 5 taş eşleştirirsen gökkuşağı yumağı çıkar. Bir taşla yer değiştir, o türdeki bütün taşlar gitsin!"},
-	"box": {"art": "box_2", "title": "Yeni: Karton kutu", "text": "Kutunun hemen yanında eşleşme yap ya da özel taşla vur. Çift bantlı kutular iki vuruşta açılır."},
-	"paw": {"art": "paw_print", "title": "Yeni: Pati izi", "text": "Pati izinin üstündeki taşı eşleştir, iz silinsin. Bütün izleri temizle!"},
+	"basics": {"tile": [1, M3.Special.NONE], "title": "Hoş geldin, şef!", "text": "Bir malzemeyi yanındakiyle yer değiştir. Aynı türden 3 malzeme yan yana gelince doğranır. Siparişteki malzemeleri topla!"},
+	"serve": {"art": "dish", "title": "Servis zamanı", "text": "Sipariş tamamlanınca yemek kapaklı tabakta tahtaya düşer. Tabağı altındaki malzemeyle yer değiştirerek aşağı indir; inemeyince masaya servis edilir."},
+	"tables": {"art": "dish", "title": "Kalabalık masa", "text": "Artık birden çok masa sipariş veriyor. Her masanın sabrı hamle hamle azalır; sabrı biten masa kalkıp gider!"},
+	"line": {"tile": [4, M3.Special.LINE_H], "title": "4'lü eşleşme", "text": "Bir sırada 4 malzeme eşleştirirsen çizgili malzeme çıkar. Onu patlatınca bütün sıra doğranır."},
+	"bomb": {"tile": [3, M3.Special.BOMB], "title": "L ve T şekli", "text": "Malzemeleri L ya da T şeklinde eşleştirirsen bomba çıkar; patlayınca çevresini doğrar."},
+	"flyer": {"tile": [2, M3.Special.FLYER], "title": "Kare eşleşme", "text": "2x2 kare eşleştir: kağıt uçak çıkar ve siparişteki bir malzemeye uçup vurur."},
+	"color": {"tile": [0, M3.Special.COLOR], "title": "5'li eşleşme", "text": "Bir sırada 5 malzeme eşleştirirsen baharat topu çıkar. Bir malzemeyle yer değiştir, o türün hepsi gitsin!"},
+	"box": {"art": "box_2", "title": "Yeni: Kirli tabak", "text": "Kirli tabakların hemen yanında eşleşme yap ya da özel malzemeyle vur. Yüksek yığınlar iki vuruşta temizlenir."},
+	"paw": {"art": "paw_print", "title": "Yeni: Dökülen un", "text": "Unun üstündeki malzemeyi eşleştir, tezgâh temizlensin. Bütün unu sil!"},
 	"sack": {"art": "sack", "title": "Yeni: Mama çuvalı", "text": "Çuvallar eşleşmez. Altındaki taşları temizle ya da çuvalı alttaki taşla yer değiştirerek aşağı it; en alt sıraya inince toplanır."},
-	"knot": {"art": "knot", "title": "Yeni: Yün düğümü", "text": "Düğümlü taş yerinden oynamaz. Onu bir eşleşmeye kat, düğüm çözülsün."},
-	"kitten": {"art": "crate_2", "title": "Sandıktaki yavrular", "text": "Sandıklarda mahsur yavrular var! Sandığa iki kez vur, yavruları kurtar."},
+	"knot": {"art": "knot", "title": "Yeni: Donmuş gıda", "text": "Buz tutmuş malzeme yerinden oynamaz. Onu bir eşleşmeye kat, buzu çözülsün."},
+	"kitten": {"art": "crate_2", "title": "Yeni: Yanık tava", "text": "Yanık tava yer kaplar. Yanında iki kez eşleşme yap, tava pırıl pırıl olsun."},
 	"sleeper": {"art": "sleeper_3", "title": "Yeni: Uyuyan kedi", "text": "Yanında eşleşme yaparak kediyi üç kez dürt, uyansın. Bir hamle boyunca dokunmazsan yeniden uykuya dalar!"},
 	"stages": {"art": "star_on", "title": "Yeni: İki aşamalı hedef", "text": "Önce ilk hedefleri tamamla, sonra aynı hamlelerle ikinci hedefler açılır. İlk aşamada kırdığın engeller de sayılır!"},
-	"belt": {"art": "belt", "title": "Yeni: Konveyör", "text": "Bant her hamleden sonra taşları bir adım ok yönünde taşır; sondaki taş başa döner. Kayan taşlar da eşleşebilir!"},
-	"mouse": {"art": "mouse", "title": "Yeni: Kaçan fare", "text": "Fareler her hamlede yandaki taşa kaçar. Farenin üstünde durduğu taşı patlat, yakala!"},
+	"belt": {"art": "belt", "title": "Yeni: Konveyör", "text": "Bant her hamleden sonra malzemeleri bir adım ok yönünde taşır; sondaki malzeme başa döner. Kayan malzemeler de eşleşebilir!"},
+	"mouse": {"art": "mouse", "title": "Mutfakta fare!", "text": "Fare her hamlede yandaki malzemeye kaçar. Üstünde durduğu malzemeyi patlat, yakala!"},
 	"cage": {"art": "cage", "title": "Yeni: Kafes ve anahtar", "text": "Kafeslerde kediler mahsur! Anahtar eşleşmez; onu aşağı indir. Daha fazla inemeyince en yakın kafesi açar."},
 	"fur": {"art": "fur", "title": "Yeni: Yayılan tüy", "text": "Tüy yığınının yanında eşleşme yap, temizlensin. Bir hamlede hiç tüy temizlemezsen tüy yanındaki taşa yayılır!"},
 }
@@ -36,8 +38,10 @@ const HINT_DELAY := 6.0
 const HINT_EARLY_LEVELS := 10
 const FLYER_POOL := 8
 const TILE_KINDS := 5
-const WIN_CAT := "tarcin"
-const LOSE_CAT := "duman"
+const LOSE_ART := "crate_2"
+const ORDER_CARD := Color("fff6e8")
+# A table's patience turns red at this many moves.
+const PATIENCE_WARNING := 3
 const FALLBACK_STOCK := 3
 const VIBRATION_MS := 40
 
@@ -58,7 +62,9 @@ var _combo_label: Label
 var _overlay: ColorRect
 var _end_panel: PanelContainer
 var _end_state: StringName = &""
-var _end_cat: CatRig
+var _end_art: TextureRect
+var _order_column: VBoxContainer
+var _order_cards: Array = []
 var _end_title: Label
 var _end_detail: Label
 var _stars_row: HBoxContainer
@@ -91,6 +97,8 @@ var _intro_title: Label
 var _intro_text: Label
 var _intro_id := ""
 var _attempt_open := false
+# True while the level being won had never been beaten before.
+var _first_clear := false
 var _pause_note: Label
 
 
@@ -99,6 +107,8 @@ func _ready() -> void:
 	for kind in range(1, M3.SACK + 1):
 		if kind <= TILE_KINDS:
 			_textures.append(ArtAtlas.texture("tile_%d" % kind))
+		elif kind == M3.DISH:
+			_textures.append(ArtAtlas.texture("dish"))
 		elif kind == M3.KEY:
 			_textures.append(ArtAtlas.texture("key"))
 		elif kind == M3.SACK:
@@ -196,6 +206,7 @@ func _start_level() -> void:
 	_badge.visible = level.difficulty > 0
 	_badge.get_child(0).text = "Zor" if level.difficulty == 1 else "Çok zor"
 	_moves_label.text = str(session.moves_left)
+	_build_orders()
 	_build_goals()
 	_refresh_goals(session.goals)
 	_refresh_boosters()
@@ -229,6 +240,7 @@ func _on_won() -> void:
 	_close_attempt()
 	_end_state = &"party"
 	var progress := UiKit.progress()
+	_first_clear = progress != null and progress.stars_for(level.id) == 0
 	if progress:
 		result = progress.record_win(level.id, session.moves_left, level.moves)
 	else:
@@ -244,7 +256,7 @@ func _play_party() -> void:
 	var steps := session.party(MetaRules.PARTY_MAX_MOVES, level.rng_seed)
 	if steps.is_empty():
 		return
-	_show_banner("Kedi Partisi!")
+	_show_banner("Mutfak Şenliği!")
 	await board_view.play(steps)
 	_moves_label.text = str(session.moves_left)
 
@@ -252,21 +264,38 @@ func _play_party() -> void:
 func _present_win() -> void:
 	_end_state = &"win"
 	UiKit.sound(&"win")
-	_end_title.text = "Harika, kazandın!"
+	var dish := served_dish()
+	_end_title.text = ("%s hazır!" % MetaRules.recipe_name(dish)) if dish != "" else "Harika, kazandın!"
 	var detail := "+%d altın" % int(result.get("coins", 0))
 	if int(result.get("party_coins", 0)) > 0:
-		detail += "  (Kedi Partisi +%d)" % int(result.party_coins)
-	var rescue := rescue_pending()
-	if rescue:
-		detail += "\nBir dost seni bekliyor!"
+		detail += "  (Mutfak Şenliği +%d)" % int(result.party_coins)
+	if dish != "":
+		detail += "\nMasa %d: “%s”" % [session.orders.size(), MetaRules.quote_for(level.id)]
+	var recipe := MetaRules.recipe_index_for_level(level.id)
+	if _first_clear and recipe >= 0:
+		detail += "\nYeni tarif: %s tarif defterine eklendi!" % MetaRules.RECIPES[recipe].name
 	_end_detail.text = detail
 	_stars_row.visible = true
 	_show_stars(int(result.get("stars", 1)))
 	_continue_coins.visible = false
 	_continue_ad.visible = false
-	_primary.text = "Yeni dostla tanış" if rescue else "Devam"
+	_primary.text = "Devam"
 	_secondary.text = "Tekrar oyna"
-	_open_end(WIN_CAT)
+	_open_end(ArtAtlas.texture("dish_%s" % dish) if dish != "" else ArtAtlas.texture("star_on"))
+
+
+# The dish of the last table, shown on the win card; empty on levels without orders.
+func served_dish() -> String:
+	return str(session.orders.back().dish) if not session.orders.is_empty() else ""
+
+
+# The first table that left because its patience ran out, or -1.
+func impatient_table() -> int:
+	for n in session.orders.size():
+		var order: Dictionary = session.orders[n]
+		if int(order.state) != M3Session.ORDER_SERVED and int(order.patience) <= 0:
+			return n
+	return -1
 
 
 # An attempt starts with the first move or booster; winning closes it for free, anything else costs a bowl.
@@ -309,16 +338,13 @@ func _retry() -> void:
 		_start_level()
 
 
-func rescue_pending() -> bool:
-	var progress := UiKit.progress()
-	return progress != null and level != null and progress.next_pending_rescue_level() == level.id
-
-
 func _on_lost() -> void:
 	_end_state = &"lose"
 	UiKit.sound(&"lose")
-	_end_title.text = "Hamleler bitti"
-	_end_detail.text = _goals_left_text() + "\nVazgeçersen bir kap boşalır."
+	var table := impatient_table()
+	_end_title.text = "Müşteri kalktı" if table >= 0 else "Hamleler bitti"
+	var reason := ("Masa %d beklemekten sıkıldı." % (table + 1)) if table >= 0 else _goals_left_text()
+	_end_detail.text = reason + "\nVazgeçersen bir çay eksilir."
 	_stars_row.visible = false
 	var progress := UiKit.progress()
 	var ads := UiKit.ads()
@@ -328,13 +354,11 @@ func _on_lost() -> void:
 	_continue_ad.visible = not _continued and ads != null and ads.is_rewarded_available(&"continue")
 	_primary.text = "Tekrar dene"
 	_secondary.text = "Haritaya dön"
-	_open_end(LOSE_CAT)
+	_open_end(ArtAtlas.texture(LOSE_ART))
 
 
 func _on_primary() -> void:
-	if _end_state == &"win" and rescue_pending():
-		UiKit.go(&"rescue", {"level_id": level.id})
-	elif _end_state == &"win":
+	if _end_state == &"win":
 		_leave_to_map(true)
 	else:
 		_retry()
@@ -468,12 +492,12 @@ func _on_confirm_no() -> void:
 	_close_overlay()
 
 
-func _open_end(cat_id: String) -> void:
+func _open_end(art: Texture2D) -> void:
 	_confirm_panel.visible = false
 	_intro_panel.visible = false
 	_pause_panel.visible = false
 	_end_panel.visible = true
-	_end_cat.setup(cat_id, 210.0, UiKit.idle_level())
+	_end_art.texture = art
 	_overlay.visible = true
 
 
@@ -503,6 +527,13 @@ func _show_stars(count: int) -> void:
 
 func _goals_left_text() -> String:
 	var parts := PackedStringArray()
+	for order in session.orders:
+		if int(order.state) == M3Session.ORDER_READY:
+			parts.append("servis bekleyen %s" % MetaRules.recipe_name(order.dish).to_lower())
+		elif int(order.state) == M3Session.ORDER_COOKING:
+			for kind in order.need:
+				if int(order.need[kind]) > 0:
+					parts.append("%d %s" % [order.need[kind], KIND_NAMES.get(kind, "malzeme")])
 	for kind in session.goals:
 		if session.goals[kind] > 0:
 			parts.append("%d %s" % [session.goals[kind], KIND_NAMES.get(kind, "taş")])
@@ -528,6 +559,100 @@ func _refresh_goals(remaining: Dictionary) -> void:
 		_goal_items[kind].count.text = "%d / %d" % [done, total]
 		_goal_items[kind].bar.max_value = total
 		_goal_items[kind].bar.value = done
+	_goal_row.visible = not _goal_items.is_empty()
+	_refresh_orders()
+
+
+# One card per table: the dish, its ingredients and how much patience the table has left.
+func _build_orders() -> void:
+	for child in _order_column.get_children():
+		child.queue_free()
+	_order_cards.clear()
+	_order_column.visible = not session.orders.is_empty()
+	for n in session.orders.size():
+		var order: Dictionary = session.orders[n]
+		var card := PanelContainer.new()
+		card.add_theme_stylebox_override("panel", UiKit.box(ORDER_CARD, 20, 10, false))
+		_order_column.add_child(card)
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 12)
+		card.add_child(row)
+		var dish := TextureRect.new()
+		var sprite := "dish_%s" % order.dish
+		dish.texture = ArtAtlas.texture(sprite if AtlasData.SPRITES.has(sprite) else "dish")
+		dish.custom_minimum_size = Vector2(96, 72)
+		dish.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		dish.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		row.add_child(dish)
+		var info := VBoxContainer.new()
+		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		info.alignment = BoxContainer.ALIGNMENT_CENTER
+		row.add_child(info)
+		info.add_child(UiKit.label("MASA %d · %s" % [n + 1, MetaRules.recipe_name(order.dish)], 22, UiKit.MUTED))
+		var items_row := HBoxContainer.new()
+		items_row.add_theme_constant_override("separation", 14)
+		info.add_child(items_row)
+		var items := {}
+		for kind in order.total:
+			var item := HBoxContainer.new()
+			item.add_theme_constant_override("separation", 4)
+			items_row.add_child(item)
+			var icon := TextureRect.new()
+			icon.texture = _goal_texture(kind)
+			icon.custom_minimum_size = Vector2(44, 44)
+			icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			item.add_child(icon)
+			var count := UiKit.label("", 24)
+			item.add_child(count)
+			items[kind] = {"icon": icon, "count": count}
+		var status := UiKit.label("", 24, UiKit.ACCENT)
+		status.visible = false
+		info.add_child(status)
+		var patience_box := VBoxContainer.new()
+		patience_box.alignment = BoxContainer.ALIGNMENT_CENTER
+		row.add_child(patience_box)
+		patience_box.add_child(UiKit.centered_label("sabır", 18, UiKit.MUTED))
+		var patience := UiKit.centered_label("", 34)
+		patience_box.add_child(patience)
+		_order_cards.append({"card": card, "items": items, "items_row": items_row, "status": status, "patience": patience})
+
+
+func _refresh_orders() -> void:
+	for n in mini(_order_cards.size(), session.orders.size()):
+		var order: Dictionary = session.orders[n]
+		var view: Dictionary = _order_cards[n]
+		for kind in view.items:
+			var total := int(order.total[kind])
+			view.items[kind].count.text = "%d/%d" % [total - int(order.need.get(kind, 0)), total]
+		var state := int(order.state)
+		var served := state == M3Session.ORDER_SERVED
+		view.items_row.visible = state == M3Session.ORDER_COOKING
+		view.status.visible = not view.items_row.visible
+		view.status.text = "Servis edildi" if served else "Hazır! Tabağı aşağı indir"
+		view.patience.text = "" if served else str(order.patience)
+		var low := not served and int(order.patience) <= PATIENCE_WARNING
+		view.patience.add_theme_color_override("font_color", UiKit.DANGER if low else UiKit.INK)
+		view.card.modulate.a = 0.55 if served else 1.0
+
+
+func _on_order_changed(_order: int, state: int) -> void:
+	_refresh_orders()
+	if state == M3Session.ORDER_READY:
+		_show_banner("Yemek hazır!")
+	elif state == M3Session.ORDER_SERVED:
+		UiKit.sound(&"coin")
+		_show_banner("Servis!")
+
+
+# Ingredient flyers head for the goal card, or for the first cooking table that orders the ingredient.
+func _flyer_target(kind: int) -> TextureRect:
+	if _goal_items.has(kind):
+		return _goal_items[kind].icon
+	for n in mini(_order_cards.size(), session.orders.size()):
+		if _order_cards[n].items.has(kind) and int(session.orders[n].state) == M3Session.ORDER_COOKING:
+			return _order_cards[n].items[kind].icon
+	return null
 
 
 func _refresh_boosters() -> void:
@@ -551,7 +676,8 @@ func _on_special_created(_special: int) -> void:
 
 
 func _on_tile_cleared(kind: int, global_pos: Vector2) -> void:
-	if not _goal_items.has(kind):
+	var icon := _flyer_target(kind)
+	if icon == null:
 		return
 	var sprite: Sprite2D = null
 	for candidate in _flyers:
@@ -560,7 +686,6 @@ func _on_tile_cleared(kind: int, global_pos: Vector2) -> void:
 			break
 	if sprite == null:
 		return
-	var icon: TextureRect = _goal_items[kind].icon
 	var target := icon.get_global_rect().get_center()
 	sprite.texture = _goal_texture(kind)
 	sprite.global_position = global_pos
@@ -646,10 +771,16 @@ func _build_ui() -> void:
 	var goal_card := PanelContainer.new()
 	goal_card.add_theme_stylebox_override("panel", UiKit.box(Color.WHITE, 28, 18))
 	column.add_child(goal_card)
+	var goal_stack := VBoxContainer.new()
+	goal_stack.add_theme_constant_override("separation", 10)
+	goal_card.add_child(goal_stack)
+	_order_column = VBoxContainer.new()
+	_order_column.add_theme_constant_override("separation", 8)
+	goal_stack.add_child(_order_column)
 	_goal_row = HBoxContainer.new()
 	_goal_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	_goal_row.add_theme_constant_override("separation", 32)
-	goal_card.add_child(_goal_row)
+	goal_stack.add_child(_goal_row)
 
 	var play_area := VBoxContainer.new()
 	play_area.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -663,6 +794,8 @@ func _build_ui() -> void:
 	board_view.cell_tapped.connect(_on_cell_tapped)
 	board_view.goals_changed.connect(_refresh_goals)
 	board_view.stage_changed.connect(_on_stage_changed)
+	board_view.order_changed.connect(_on_order_changed)
+	board_view.patience_changed.connect(func(_values: PackedInt32Array) -> void: _refresh_orders())
 	board_view.tile_cleared.connect(_on_tile_cleared)
 	board_view.combo.connect(_on_combo)
 	board_view.special_created.connect(_on_special_created)
@@ -722,7 +855,7 @@ func open_pause() -> void:
 	if _overlay.visible or session.is_finished():
 		return
 	_refresh_pause_toggles()
-	_pause_note.text = "Yeniden başlarsan ya da çıkarsan bir mama kabı boşalır." if _attempt_open else "Henüz hamle yapmadın; çıkmak ücretsiz."
+	_pause_note.text = "Yeniden başlarsan ya da çıkarsan bir çay eksilir." if _attempt_open else "Henüz hamle yapmadın; çıkmak ücretsiz."
 	_end_panel.visible = false
 	_confirm_panel.visible = false
 	_intro_panel.visible = false
@@ -788,7 +921,7 @@ func _build_pause_panel(parent: Control) -> void:
 	rows.add_theme_constant_override("separation", 18)
 	_pause_panel.add_child(rows)
 	rows.add_child(UiKit.centered_label("Mola", 52))
-	rows.add_child(UiKit.centered_label("Kediler seni bekliyor.", 28, UiKit.MUTED))
+	rows.add_child(UiKit.centered_label("Masalar seni bekliyor.", 28, UiKit.MUTED))
 	var resume := UiKit.button("Devam et", 34, Vector2(0, 100), UiKit.ACCENT, Color.WHITE, 50)
 	resume.pressed.connect(close_pause)
 	rows.add_child(resume)
@@ -854,12 +987,11 @@ func _build_end_panel(parent: Control) -> void:
 	var rows := VBoxContainer.new()
 	rows.add_theme_constant_override("separation", 18)
 	_end_panel.add_child(rows)
-	var cat_holder := Control.new()
-	cat_holder.custom_minimum_size = Vector2(0, 220)
-	rows.add_child(cat_holder)
-	_end_cat = CatRig.new()
-	cat_holder.add_child(_end_cat)
-	cat_holder.resized.connect(func() -> void: _end_cat.position = Vector2(cat_holder.size.x / 2.0, cat_holder.size.y))
+	_end_art = TextureRect.new()
+	_end_art.custom_minimum_size = Vector2(0, 220)
+	_end_art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_end_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	rows.add_child(_end_art)
 	_end_title = UiKit.label("", 50)
 	_end_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	rows.add_child(_end_title)

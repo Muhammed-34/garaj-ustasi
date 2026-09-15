@@ -300,8 +300,12 @@ func served_count() -> int:
 	return count
 
 
+# Extra moves also calm every waiting table, or a continue after a table ran out of patience would be useless.
 func add_moves(amount: int) -> void:
 	moves_left += amount
+	for order in orders:
+		if order.state != ORDER_SERVED:
+			order.patience = int(order.patience) + amount
 
 
 func stage_count() -> int:

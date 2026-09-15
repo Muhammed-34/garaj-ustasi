@@ -5,8 +5,14 @@
 [resource]
 script = ExtResource("1_rpypy")
 id = 2
-goals = Dictionary[int, int]({
-3: 18
-})
 rng_seed = 1002
 layout = PackedStringArray()
+orders = Array[Dictionary]([{
+"dish": "menemen",
+"goals": {
+1: 8,
+3: 8
+},
+"patience": 20
+}])
+intro = "serve"

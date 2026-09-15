@@ -5,11 +5,15 @@
 [resource]
 script = ExtResource("1_gigq4")
 id = 9
-goals = Dictionary[int, int]({
-2: 44,
-3: 41,
-5: 36
-})
 rng_seed = 1009
 difficulty = 1
 layout = PackedStringArray()
+orders = Array[Dictionary]([{
+"dish": "coban",
+"goals": {
+1: 18,
+2: 16,
+4: 14
+},
+"patience": 20
+}])

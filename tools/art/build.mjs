@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { Resvg } from '@resvg/resvg-js';
 import { CATS, DEFS, ICON, SIL, STAR_OFF, STAR_ON, TILES, catHead, catParts } from './m3v2-assets.mjs';
 import { OBSTACLES, OBSTACLE_DEFS } from './obstacles.mjs';
+import { DISH_DEFS, LOCKED_DISH, RECIPES } from './dishes.mjs';
 
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const artDir = join(projectRoot, 'game', 'art');
@@ -11,9 +12,10 @@ const ATLAS_WIDTH = 2048;
 // Empty space around each sprite (in 2x pixels) so linear filtering never samples a neighbour.
 const PAD = 8;
 
-// Index + 1 is the tile kind used by the match-3 core: 1 food bowl, 2 yarn, 3 fish, 4 paw, 5 bell.
-const TILE_KEYS = ['k-m', 'k-y', 'k-b', 'k-p', 'k-c'];
-const BOOSTER_ICONS = { booster_row: 'lazer', booster_shuffle: 'nane', booster_single: 'pence' };
+// Index + 1 is the tile kind used by the match-3 core: 1 tomato, 2 pepper, 3 egg, 4 onion, 5 cheese.
+const TILE_KEYS = ['t-d', 't-b', 't-y', 't-s', 't-p'];
+// Row clear = rolling pin, shuffle = ladle stir, single tile = knife.
+const BOOSTER_ICONS = { booster_row: 'oklava', booster_shuffle: 'kepce', booster_single: 'bicak' };
 const CAT_FRAME = { w: 200, h: 264, viewBox: '0 0 100 132' };
 const CAT_PIVOTS = {
   tail: [0.74, 118 / 132],
@@ -31,6 +33,8 @@ add('star_on', 96, 96, '0 0 48 48', STAR_ON);
 add('star_off', 96, 96, '0 0 48 48', STAR_OFF);
 add('cat_silhouette', 200, 200, '0 0 100 100', SIL);
 for (const [name, body] of Object.entries(OBSTACLES)) add(name, 192, 192, '0 0 48 48', body);
+for (const recipe of RECIPES) add(`dish_${recipe.id}`, 240, 180, '0 0 160 120', recipe.art);
+add('dish_locked', 240, 180, '0 0 160 120', LOCKED_DISH);
 for (const cat of Object.keys(CATS)) {
   const parts = catParts(cat);
   add(`cat_${cat}_tail`, CAT_FRAME.w, CAT_FRAME.h, CAT_FRAME.viewBox, parts.tail, CAT_PIVOTS.tail);
@@ -63,7 +67,7 @@ const { placed, height } = pack(sprites);
 const inner = placed
   .map((s) => `<svg x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" viewBox="${s.viewBox}">${s.body}</svg>`)
   .join('');
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${ATLAS_WIDTH}" height="${height}" viewBox="0 0 ${ATLAS_WIDTH} ${height}"><defs>${DEFS}${OBSTACLE_DEFS}</defs>${inner}</svg>`;
+const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${ATLAS_WIDTH}" height="${height}" viewBox="0 0 ${ATLAS_WIDTH} ${height}"><defs>${DEFS}${OBSTACLE_DEFS}${DISH_DEFS}</defs>${inner}</svg>`;
 
 const render = (width) =>
   new Resvg(svg, { fitTo: { mode: 'width', value: width }, font: { loadSystemFonts: false } }).render().asPng();

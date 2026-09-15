@@ -123,6 +123,19 @@ func stars_for(level_id: int) -> int:
 	return int(data.stars.get(str(level_id), 0))
 
 
+# A recipe is in the book once its level has been won.
+func is_recipe_unlocked(index: int) -> bool:
+	return index >= 0 and index < MetaRules.RECIPES.size() and stars_for(MetaRules.recipe_unlock_level(index)) > 0
+
+
+func recipes_unlocked() -> int:
+	var count := 0
+	for n in MetaRules.RECIPES.size():
+		if is_recipe_unlocked(n):
+			count += 1
+	return count
+
+
 func highest_beaten() -> int:
 	var best := 0
 	for key in data.stars:

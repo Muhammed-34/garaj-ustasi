@@ -7,9 +7,15 @@ script = ExtResource("1_6uugw")
 id = 45
 moves = 22
 goals = Dictionary[int, int]({
-3: 43,
-11: 14,
-13: 3
+18: 2
 })
 rng_seed = 1045
-layout = PackedStringArray(".......", "PPPPPPP", ".K.K.K.", "PPPPPPP", ".......", ".......", ".......")
+layout = PackedStringArray(".......", ".M...M.", ".......", ".......", ".......", ".......", ".......")
+orders = Array[Dictionary]([{
+"dish": "omlet",
+"goals": {
+3: 14,
+5: 12
+},
+"patience": 22
+}])

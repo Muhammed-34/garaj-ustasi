@@ -6,9 +6,7 @@ const SCENES := {
 	&"game": "res://game/scenes/game/game.tscn",
 	&"settings": "res://game/scenes/settings/settings.tscn",
 	&"licenses": "res://game/scenes/licenses/licenses.tscn",
-	&"rescue": "res://game/scenes/rescue/rescue.tscn",
-	&"shelter": "res://game/scenes/shelter/shelter.tscn",
-	&"album": "res://game/scenes/album/album.tscn",
+	&"recipes": "res://game/scenes/recipes/recipes.tscn",
 }
 const FADE_TIME := 0.18
 

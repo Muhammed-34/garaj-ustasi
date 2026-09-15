@@ -70,12 +70,15 @@ func _tune_moves(id: int, base: M3LevelDef, target: float, seeds: int) -> void:
 
 func _report(id: int, level: M3LevelDef, rate: float) -> void:
 	var row: Array = LevelTable.TABLE[id - 1]
-	var goals := _goal_text(row[2], level.goals)
-	var second := ""
-	if row.size() > 6:
-		second = ", {%s}" % _goal_text(row[6], level.goals_2)
-	print("ROW %03d [%d, %d, {%s}, \"%s\", %d, \"%s\"%s],  # bot %.2f" % [
-		id, level.moves, row[1], goals, row[3], row[4], row[5], second, rate])
+	var orders := PackedStringArray()
+	for n in level.orders.size():
+		var order: Dictionary = level.orders[n]
+		var parts := PackedStringArray()
+		for kind in order.goals:
+			parts.append("%d: %d" % [kind, order.goals[kind]])
+		orders.append("[\"%s\", {%s}, %d]" % [order.dish, ", ".join(parts), row[2][n][2]])
+	print("ROW %03d [%d, %d, [%s], {%s}, \"%s\", \"%s\"],  # bot %.2f" % [
+		id, level.moves, row[1], ", ".join(orders), _goal_text(row[3], level.goals), row[4], row[5], rate])
 
 
 # Obstacle goals keep the table's value (usually 0 = all); tile goals show the tuned count.
@@ -89,6 +92,8 @@ func _goal_text(row_goals: Dictionary, tuned: Dictionary) -> String:
 
 
 func _has_tile_goals(level: M3LevelDef) -> bool:
+	if not level.orders.is_empty():
+		return true
 	for key in level.goals:
 		if key <= level.kind_count:
 			return true
@@ -102,6 +107,14 @@ func _scaled(base: M3LevelDef, percent: int) -> M3LevelDef:
 	var level: M3LevelDef = base.duplicate()
 	level.goals = _scaled_goals(base.goals, base.kind_count, percent)
 	level.goals_2 = _scaled_goals(base.goals_2, base.kind_count, percent)
+	# A fresh array: duplicate() would share the orders with the base level.
+	var orders: Array[Dictionary] = []
+	for order in base.orders:
+		var goals := {}
+		for kind in order.goals:
+			goals[kind] = maxi(1, roundi(order.goals[kind] * percent / 100.0))
+		orders.append({"dish": order.dish, "goals": goals, "patience": order.patience})
+	level.orders = orders
 	return level
 
 
