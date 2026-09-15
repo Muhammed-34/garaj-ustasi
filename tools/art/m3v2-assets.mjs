@@ -82,12 +82,25 @@ export function catHead(n) {
   return `<path d="M16 46C12 30 14 14 20 8c8 4 18 12 24 20z" fill="url(#f-${n})"/><path d="M84 46C88 30 86 14 80 8c-8 4-18 12-24 20z" fill="url(#f-${n})"/><path d="M22 38c-2-9-1-18 2-23 5 3 10 8 14 13z" fill="url(#earIn)"/><path d="M78 38c2-9 1-18-2-23-5 3-10 8-14 13z" fill="url(#earIn)"/><path d="M50 22c24 0 40 15 40 36 0 20-17 32-40 32S10 78 10 58c0-21 16-36 40-36z" fill="url(#f-${n})"/>${stripes}<ellipse cx="50" cy="71" rx="21" ry="13" fill="url(#muz)"/><ellipse cx="23" cy="68" rx="8" ry="5" fill="url(#blush)"/><ellipse cx="77" cy="68" rx="8" ry="5" fill="url(#blush)"/>${eye(34)}${eye(66)}<path d="M45 66h10c0 3-3 5-5 6-2-1-5-3-5-6z" fill="url(#nose)"/><path d="M50 72v3M50 75c-2 3-6 3-8 1M50 75c2 3 6 3 8 1" stroke="#4a3228" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.7"/><path d="M28 70H9M29 75l-16 4M72 70h19M71 75l16 4" stroke="${c.w}" stroke-width="1.3" opacity="0.85" stroke-linecap="round"/><ellipse cx="37" cy="32" rx="12" ry="4.5" fill="#ffffff" opacity="0.35" transform="rotate(-15 37 32)"/>`;
 }
 
-export function catSit(n) {
+// Every part is drawn in the same 100x132 frame so the pieces line up when layered in the game.
+export function catParts(n) {
   const c = CATS[n];
-  return `<ellipse cx="50" cy="126" rx="38" ry="5" fill="url(#gs)"/><path d="M74 118c16-2 22-14 18-28" stroke="${c.d}" stroke-width="9" fill="none" stroke-linecap="round"/><path d="M74 118c16-2 22-14 18-28" stroke="${c.b}" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M20 124c-4-30 8-56 30-56s34 26 30 56z" fill="url(#f-${n})"/><ellipse cx="50" cy="100" rx="14" ry="20" fill="url(#muz)"/><ellipse cx="38" cy="122" rx="9" ry="6" fill="url(#f-${n})"/><ellipse cx="62" cy="122" rx="9" ry="6" fill="url(#f-${n})"/><g transform="translate(6 -4) scale(0.88)">${catHead(n)}</g>`;
+  const onHead = (inner) => `<g transform="translate(6 -4) scale(0.88)">${inner}</g>`;
+  return {
+    shadow: '<ellipse cx="50" cy="126" rx="38" ry="5" fill="url(#gs)"/>',
+    tail: `<path d="M74 118c16-2 22-14 18-28" stroke="${c.d}" stroke-width="9" fill="none" stroke-linecap="round"/><path d="M74 118c16-2 22-14 18-28" stroke="${c.b}" stroke-width="6" fill="none" stroke-linecap="round"/>`,
+    body: `<path d="M20 124c-4-30 8-56 30-56s34 26 30 56z" fill="url(#f-${n})"/><ellipse cx="50" cy="100" rx="14" ry="20" fill="url(#muz)"/><ellipse cx="38" cy="122" rx="9" ry="6" fill="url(#f-${n})"/><ellipse cx="62" cy="122" rx="9" ry="6" fill="url(#f-${n})"/>`,
+    head: onHead(catHead(n)),
+    blink: onHead(`<ellipse cx="34" cy="55" rx="9" ry="10.5" fill="${c.b}"/><ellipse cx="66" cy="55" rx="9" ry="10.5" fill="${c.b}"/><path d="M26 56Q34 62 42 56M58 56Q66 62 74 56" stroke="#3a2a20" stroke-width="2.6" fill="none" stroke-linecap="round"/>`),
+  };
 }
 
-export const SIL = '<path d="M16 46C12 30 14 14 20 8c8 4 18 12 24 20z" fill="url(#f-sil)"/><path d="M84 46C88 30 86 14 80 8c-8 4-18 12-24 20z" fill="url(#f-sil)"/><path d="M50 22c24 0 40 15 40 36 0 20-17 32-40 32S10 78 10 58c0-21 16-36 40-36z" fill="url(#f-sil)"/><text x="50" y="70" text-anchor="middle" font-family="Fredoka, Nunito, sans-serif" font-weight="700" font-size="36" fill="#ffffff" opacity="0.9">?</text>';
+export function catSit(n) {
+  const p = catParts(n);
+  return p.shadow + p.tail + p.body + p.head;
+}
+
+export const SIL = '<path d="M16 46C12 30 14 14 20 8c8 4 18 12 24 20z" fill="url(#f-sil)"/><path d="M84 46C88 30 86 14 80 8c-8 4-18 12-24 20z" fill="url(#f-sil)"/><path d="M50 22c24 0 40 15 40 36 0 20-17 32-40 32S10 78 10 58c0-21 16-36 40-36z" fill="url(#f-sil)"/><path d="M40 50c0-8 5-13 10-13s10 4 10 10c0 7-10 8-10 15" stroke="#ffffff" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.9"/><circle cx="50" cy="75" r="4.5" fill="#ffffff" opacity="0.9"/>';
 
 const pan = '<ellipse cx="78" cy="106" rx="66" ry="9" fill="url(#gs)"/><path d="M128 66l28-8c4-1 6 5 2 7l-28 10z" fill="url(#iron)"/><ellipse cx="72" cy="72" rx="64" ry="34" fill="url(#iron)"/><ellipse cx="72" cy="66" rx="61" ry="30" fill="#2a2624"/><ellipse cx="72" cy="68" rx="55" ry="26" fill="url(#sauce)"/><ellipse cx="42" cy="72" rx="6" ry="4" fill="url(#tomC)"/><ellipse cx="62" cy="84" rx="7" ry="4" fill="url(#tomC)"/><ellipse cx="100" cy="60" rx="6" ry="4" fill="url(#tomC)"/><ellipse cx="108" cy="78" rx="6" ry="4" fill="url(#tomC)"/><ellipse cx="80" cy="88" rx="5" ry="3" fill="url(#tomC)"/><ellipse cx="55" cy="61" rx="14" ry="9" fill="url(#eggW)"/><circle cx="55" cy="61" r="6" fill="url(#yolk)"/><circle cx="53" cy="59" r="1.8" fill="#ffffff" opacity="0.8"/><ellipse cx="90" cy="74" rx="14" ry="9" fill="url(#eggW)"/><circle cx="90" cy="74" r="6" fill="url(#yolk)"/><circle cx="88" cy="72" r="1.8" fill="#ffffff" opacity="0.8"/><path d="M34 80l7-3M104 66l7 2M72 92l6-3M78 52l-4 5" stroke="#4e9a32" stroke-width="3.5" stroke-linecap="round"/><circle cx="68" cy="74" r="1.6" fill="#2f7a22"/><circle cx="74" cy="58" r="1.4" fill="#2f7a22"/><circle cx="46" cy="80" r="1.4" fill="#2f7a22"/><path d="M16 60c10-16 40-24 70-22" stroke="#ffffff" stroke-opacity="0.25" stroke-width="3" fill="none" stroke-linecap="round"/>';
 

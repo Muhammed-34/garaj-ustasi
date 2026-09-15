@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="QualityProfile" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game/quality/quality_profile.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"low"
+particles_per_burst = 0
+screen_shake = false
+hit_stop = false
+trails = false
+shelter_idle_level = 0
+parallax = false
+atlas_scale = 1
+max_fps = 30
+tween_scale = 0.75

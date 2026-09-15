@@ -1,0 +1,42 @@
+; Engine configuration file.
+config_version=5
+
+[application]
+
+config/name="Tarif Mutfağı"
+config/version="0.1.0"
+run/main_scene="res://game/scenes/boot/boot.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+config/icon="res://icon.svg"
+
+[autoload]
+
+Quality="*res://game/autoload/quality.gd"
+Audio="*res://game/autoload/audio.gd"
+Progress="*res://game/autoload/progress.gd"
+Ads="*res://game/autoload/ads.gd"
+Router="*res://game/autoload/router.gd"
+
+[display]
+
+window/size/viewport_width=720
+window/size/viewport_height=1280
+window/size/window_width_override=405
+window/size/window_height_override=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=1
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/gdUnit4/plugin.cfg")
+
+[game]
+
+ads_enabled=false
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true

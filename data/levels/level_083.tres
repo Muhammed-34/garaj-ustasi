@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="M3LevelDef" format=3]
+
+[ext_resource type="Script" path="res://addons/match3/level_def.gd" id="1_rd7wd"]
+
+[resource]
+script = ExtResource("1_rd7wd")
+id = 83
+moves = 22
+goals = Dictionary[int, int]({
+3: 34,
+15: 2,
+16: 1
+})
+rng_seed = 1083
+layout = PackedStringArray(".......", ".Z...Z.", ".......", "...F...", ".......", ".......", ".......")
