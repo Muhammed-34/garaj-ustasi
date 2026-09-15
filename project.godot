@@ -4,10 +4,10 @@ config_version=5
 [application]
 
 config/name="Garaj Ustası"
-config/version="0.1.0"
+config/version="0.1.1"
 run/main_scene="res://game/scenes/boot/boot.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
-config/icon="res://icon.svg"
+config/icon="res://icon.png"
 
 [autoload]
 

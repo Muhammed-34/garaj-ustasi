@@ -3,6 +3,8 @@ extends Control
 const NODE_SIZE := 150.0
 const NODE_RADIUS := 75
 const BOTTOM_ROOM := 90.0
+# How far the themed track runs on below level 1 and above the last level.
+const TRACK_RUN_OUT := 260.0
 
 static var _calendar_offered_on := ""
 # Level opened from the map this session; the map reopens there. 0 means none yet.
@@ -30,12 +32,13 @@ var _bowl_tick := 0.0
 var _star_rows := {}
 var _coins_label: Label
 var _scroll: DragScroll
+var _path: VBoxContainer
 var _calendar_rows: VBoxContainer
 var _claim_button: Button
 
 
 func _ready() -> void:
-	add_child(UiKit.background())
+	add_child(MapTheme.background())
 	var page := UiKit.page()
 	add_child(page)
 	var column := VBoxContainer.new()
@@ -92,6 +95,10 @@ func _ready() -> void:
 	path.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	path.add_theme_constant_override("separation", 30)
 	_scroll.add_child(path)
+	# The themed track and scenery are drawn by the level column itself, so they scroll with the levels.
+	_path = path
+	path.draw.connect(_draw_track)
+	path.sort_children.connect(func() -> void: path.queue_redraw.call_deferred())
 	# Shown above the last level once every level is beaten, so finishing the game has an ending.
 	finale_card = PanelContainer.new()
 	finale_card.add_theme_stylebox_override("panel", UiKit.box(Color("fff4e8"), 30, 28))
@@ -323,6 +330,7 @@ func _level_row(id: int) -> Control:
 	row.add_child(node)
 	var button := UiKit.button(str(id), 54, Vector2(NODE_SIZE, NODE_SIZE), Color.WHITE, UiKit.INK, NODE_RADIUS)
 	button.pressed.connect(_open_level.bind(id))
+	MapTheme.decorate_node(button)
 	node.add_child(button)
 	var stars := HBoxContainer.new()
 	stars.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -373,7 +381,7 @@ func _refresh() -> void:
 		var button := level_buttons[id - 1]
 		button.disabled = not unlocked
 		var current := unlocked and stars == 0
-		UiKit.style_button(button, UiKit.ACCENT if current else Color.WHITE, Color.WHITE if current else UiKit.INK, NODE_RADIUS)
+		MapTheme.style_node(button, &"current" if current else (&"done" if unlocked else &"locked"))
 		var n := 0
 		for star in _star_rows[id].get_children():
 			star.texture = star_on if n < stars else star_off
@@ -482,3 +490,37 @@ func _update_jump_buttons() -> void:
 	bottom_button.visible = _scroll.scroll_vertical < _scroll.max_offset() - margin
 	next_button.visible = not is_level_on_screen(current_level()) and not all_levels_done()
 	next_button.text = "%d. bölüme git" % current_level()
+
+
+# Centres of the level buttons in the level column's own coordinates, from level 1 upwards.
+func level_centers() -> PackedVector2Array:
+	var centers := PackedVector2Array()
+	if _path == null:
+		return centers
+	var to_path := _path.get_global_transform().affine_inverse()
+	for button in level_buttons:
+		centers.append(to_path * button.get_global_rect().get_center())
+	return centers
+
+
+# A smooth curve through every level that runs on past level 1 and past the last level.
+func track_points() -> PackedVector2Array:
+	var centers := level_centers()
+	if centers.size() < 2:
+		return centers
+	var stops := PackedVector2Array([centers[0] + Vector2(0, TRACK_RUN_OUT)])
+	stops.append_array(centers)
+	stops.append(centers[centers.size() - 1] - Vector2(0, TRACK_RUN_OUT))
+	var curve := Curve2D.new()
+	for n in stops.size():
+		var handle := (stops[mini(n + 1, stops.size() - 1)] - stops[maxi(n - 1, 0)]) / 6.0
+		curve.add_point(stops[n], -handle, handle)
+	return curve.tessellate(4, 6.0)
+
+
+func _draw_track() -> void:
+	var points := track_points()
+	if points.size() < 2:
+		return
+	MapTheme.draw_scenery(_path, Rect2(Vector2.ZERO, _path.size))
+	MapTheme.draw_track(_path, points)
