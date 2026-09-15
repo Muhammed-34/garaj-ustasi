@@ -143,6 +143,16 @@ func test_order_cards_show_tables_ingredients_and_patience() -> void:
 	assert_object(game._order_cards[1].patience.get_theme_color("font_color")).is_equal(UiKit.DANGER)
 
 
+func test_order_card_stays_one_compact_row() -> void:
+	var game := _order_game([{"dish": "menemen", "goals": {1: 8, 2: 6}, "patience": 20}])
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var card: Control = game._order_cards[0].card
+	assert_float(card.size.y).override_failure_message("order card is %s tall" % card.size.y).is_less(140.0)
+	var patience: Label = game._order_cards[0].patience
+	assert_int(patience.get_line_count()).is_equal(1)
+
+
 func test_served_order_shows_on_its_card_and_wins_with_its_dish() -> void:
 	var game := _order_game([{"dish": "omlet", "goals": {3: 1}, "patience": 20}])
 	game.session.orders[0].need[3] = 0

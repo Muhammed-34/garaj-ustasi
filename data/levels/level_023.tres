@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_ydpki")
 id = 23
-moves = 22
+moves = 24
 goals = Dictionary[int, int]({
 10: 14
 })
@@ -14,8 +14,8 @@ layout = PackedStringArray(".......", ".......", ".......", ".......", "1111111"
 orders = Array[Dictionary]([{
 "dish": "gozleme",
 "goals": {
-4: 14,
-5: 18
+4: 21,
+5: 26
 },
-"patience": 22
+"patience": 24
 }])

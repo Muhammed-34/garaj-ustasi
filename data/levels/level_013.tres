@@ -11,15 +11,15 @@ layout = PackedStringArray()
 orders = Array[Dictionary]([{
 "dish": "menemen",
 "goals": {
-1: 10,
-2: 10
+1: 12,
+2: 12
 },
 "patience": 14
 }, {
 "dish": "omlet",
 "goals": {
-3: 10,
-5: 10
+3: 12,
+5: 12
 },
 "patience": 22
 }])

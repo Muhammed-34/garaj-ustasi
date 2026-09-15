@@ -3,13 +3,15 @@ extends Control
 
 # The opening screen's kitchen ("Çinili Mutfak"), drawn in code: a blue-and-white tiled wall, the game's
 # name on a green board, a shelf of jars and tools, and a dark stove. The picture is static and drawn once;
-# only the steam layer redraws while the screen idles. Positions are fractions of the screen.
-const WALL_BOTTOM := 0.58
-const BURNER_Y := 0.64
-const DISH_CENTER := Vector2(0.5, 0.525)
-const DISH_WIDTH := 0.56
+# only the steam layer redraws while the screen idles.
+# The sign and shelf sit at fractions of the screen height; the stove and pan sit a fixed distance (in
+# screen widths) above stage_bottom, so tall phones get more tiled wall rather than an empty stove.
 const SIGN := Rect2(0.08, 0.07, 0.84, 0.12)
 const SHELF_Y := 0.29
+const WALL_ABOVE_STAGE := 0.19
+const BURNER_ABOVE_STAGE := 0.085
+const DISH_ABOVE_STAGE := 0.29
+const DISH_WIDTH := 0.56
 const JARS := [[0.19, Color("e0503c")], [0.31, Color("f2c94c")], [0.43, Color("86c962")]]
 const TILES_ACROSS := 9
 const WALL := Color("f4f1ea")
@@ -27,6 +29,12 @@ var title_text := "":
 	set(value):
 		title_text = value
 		queue_redraw()
+# Top of the button area in pixels; 0 falls back to a fraction of the screen.
+var stage_bottom := 0.0:
+	set(value):
+		stage_bottom = value
+		queue_redraw()
+		_steam.queue_redraw()
 # Seconds of idle animation; the steam stays still while it does not advance.
 var time := 0.0:
 	set(value):
@@ -79,14 +87,20 @@ func _draw() -> void:
 # Dish rectangle in screen pixels; the title screen places the tappable pan here.
 func dish_rect() -> Rect2:
 	var dish_size := Vector2(DISH_WIDTH, DISH_WIDTH * 0.75) * size.x
-	return Rect2(_p(DISH_CENTER.x, DISH_CENTER.y) - dish_size * 0.5, dish_size)
+	return Rect2(Vector2(size.x * 0.5, _above_stage(DISH_ABOVE_STAGE)) - dish_size * 0.5, dish_size)
+
+
+func _above_stage(widths: float) -> float:
+	var stage := stage_bottom if stage_bottom > 0.0 else size.y * 0.69
+	return stage - widths * size.x
 
 
 func _draw_wall() -> void:
-	draw_rect(Rect2(Vector2.ZERO, _p(1, WALL_BOTTOM)), WALL)
+	var wall_bottom := _above_stage(WALL_ABOVE_STAGE)
+	draw_rect(Rect2(0, 0, size.x, wall_bottom), WALL)
 	var side := size.x / TILES_ACROSS
 	var row := 0
-	while row * side < size.y * WALL_BOTTOM:
+	while row * side < wall_bottom:
 		var x := -side * 0.5 if row % 2 == 1 else 0.0
 		while x < size.x:
 			var cell := Rect2(x, row * side, side, side)
@@ -99,7 +113,7 @@ func _draw_wall() -> void:
 
 
 func _draw_sign() -> void:
-	var board := _r(SIGN)
+	var board := Rect2(SIGN.position * size, SIGN.size * size)
 	draw_style_box(_board_shadow, Rect2(board.position + Vector2(0, size.y * 0.007), board.size))
 	draw_style_box(_board, board)
 	draw_style_box(_trim, board.grow(-size.x * 0.022))
@@ -115,32 +129,34 @@ func _draw_sign() -> void:
 
 
 func _draw_shelf() -> void:
-	var shelf := Rect2(_p(0.11, SHELF_Y), Vector2(size.x * 0.78, size.y * 0.012))
+	var shelf := Rect2(size.x * 0.11, size.y * SHELF_Y, size.x * 0.78, size.y * 0.012)
 	var jar_size := Vector2(size.x * 0.09, size.y * 0.052)
 	for jar in JARS:
 		var body := Rect2(Vector2(size.x * jar[0] - jar_size.x * 0.5, shelf.position.y - jar_size.y), jar_size)
 		draw_style_box(_jar, body)
 		draw_rect(Rect2(body.position + Vector2(jar_size.x * 0.1, jar_size.y * 0.36), Vector2(jar_size.x * 0.8, jar_size.y * 0.56)), jar[1])
 		draw_rect(Rect2(body.position + Vector2(-jar_size.x * 0.06, -jar_size.y * 0.1), Vector2(jar_size.x * 1.12, jar_size.y * 0.18)), WOOD)
-	_icon("booster_row", 0.64, 0.262, 0.155)
-	_icon("booster_shuffle", 0.8, 0.258, 0.14)
+	_icon("booster_row", Vector2(size.x * 0.64, size.y * 0.262), 0.155)
+	_icon("booster_shuffle", Vector2(size.x * 0.8, size.y * 0.258), 0.14)
 	draw_rect(shelf, WOOD)
 
 
 func _draw_stove() -> void:
-	draw_rect(Rect2(_p(0, WALL_BOTTOM), Vector2(size.x, size.y * (1.0 - WALL_BOTTOM))), STOVE)
-	draw_rect(Rect2(_p(0, WALL_BOTTOM), Vector2(size.x, size.y * 0.011)), STOVE_EDGE)
-	_ellipse(_p(0.5, BURNER_Y), Vector2(size.x * 0.24, size.y * 0.018), Color("1f1b19"))
-	_ellipse(_p(0.5, BURNER_Y), Vector2(size.x * 0.17, size.y * 0.01), Color("e8613b", 0.5))
-	_icon("tile_1", 0.14, 0.545, 0.16)
-	_icon("tile_3", 0.86, 0.55, 0.145)
+	var top := _above_stage(WALL_ABOVE_STAGE)
+	draw_rect(Rect2(0, top, size.x, size.y - top), STOVE)
+	draw_rect(Rect2(0, top, size.x, size.x * 0.02), STOVE_EDGE)
+	var burner := Vector2(size.x * 0.5, _above_stage(BURNER_ABOVE_STAGE))
+	_ellipse(burner, Vector2(size.x * 0.24, size.x * 0.032), Color("1f1b19"))
+	_ellipse(burner, Vector2(size.x * 0.17, size.x * 0.018), Color("e8613b", 0.5))
+	_icon("tile_1", Vector2(size.x * 0.14, _above_stage(0.254)), 0.16)
+	_icon("tile_3", Vector2(size.x * 0.86, _above_stage(0.245)), 0.145)
 
 
 # Three wisps rise over the pan and sway; a tap makes them taller and brighter for a moment.
 func _draw_steam() -> void:
 	var dish := dish_rect()
 	var bottom := dish.position.y + dish.size.y * 0.2
-	var height := size.y * (0.06 + 0.03 * puff)
+	var height := size.x * (0.11 + 0.055 * puff)
 	for n in 3:
 		var x := dish.get_center().x + (n - 1) * size.x * 0.14
 		var points := PackedVector2Array()
@@ -154,9 +170,9 @@ func _draw_steam() -> void:
 		_steam.draw_polyline(points, Color(1, 1, 1, clampf(alpha * 1.3, 0.0, 0.95)), size.x * 0.014, true)
 
 
-func _icon(sprite: String, x: float, y: float, width: float) -> void:
+func _icon(sprite: String, center: Vector2, width: float) -> void:
 	var side := size.x * width
-	draw_texture_rect(ArtAtlas.texture(sprite), Rect2(_p(x, y) - Vector2(side, side) * 0.5, Vector2(side, side)), false)
+	draw_texture_rect(ArtAtlas.texture(sprite), Rect2(center - Vector2(side, side) * 0.5, Vector2(side, side)), false)
 
 
 func _ellipse(center: Vector2, radius: Vector2, color: Color) -> void:
@@ -165,11 +181,3 @@ func _ellipse(center: Vector2, radius: Vector2, color: Color) -> void:
 		var angle := TAU * n / 32.0
 		points.append(center + Vector2(cos(angle) * radius.x, sin(angle) * radius.y))
 	draw_colored_polygon(points, color)
-
-
-func _r(fraction: Rect2) -> Rect2:
-	return Rect2(_p(fraction.position.x, fraction.position.y), fraction.size * size)
-
-
-func _p(x: float, y: float) -> Vector2:
-	return Vector2(x * size.x, y * size.y)

@@ -117,6 +117,7 @@ func _gui_input(event: InputEvent) -> void:
 
 
 func _place_dish() -> void:
+	kitchen.stage_bottom = size.y - BUTTON_AREA
 	var rect := kitchen.dish_rect()
 	dish.position = rect.position
 	dish.size = rect.size

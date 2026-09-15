@@ -609,11 +609,17 @@ func _build_orders() -> void:
 		var status := UiKit.label("", 24, UiKit.ACCENT)
 		status.visible = false
 		info.add_child(status)
+		# Fixed width with wrapping off: a wrapping label in a shrinking box breaks into one letter per line.
 		var patience_box := VBoxContainer.new()
 		patience_box.alignment = BoxContainer.ALIGNMENT_CENTER
+		patience_box.custom_minimum_size = Vector2(84, 0)
+		patience_box.add_theme_constant_override("separation", -4)
 		row.add_child(patience_box)
-		patience_box.add_child(UiKit.centered_label("sabır", 18, UiKit.MUTED))
+		var patience_word := UiKit.centered_label("sabır", 18, UiKit.MUTED)
+		patience_word.autowrap_mode = TextServer.AUTOWRAP_OFF
+		patience_box.add_child(patience_word)
 		var patience := UiKit.centered_label("", 34)
+		patience.autowrap_mode = TextServer.AUTOWRAP_OFF
 		patience_box.add_child(patience)
 		_order_cards.append({"card": card, "items": items, "items_row": items_row, "status": status, "patience": patience})
 
