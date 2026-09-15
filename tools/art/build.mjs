@@ -2,9 +2,9 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Resvg } from '@resvg/resvg-js';
-import { CATS, DEFS, ICON, SIL, STAR_OFF, STAR_ON, TILES, catHead, catParts } from './m3v2-assets.mjs';
+import { CATS, DEFS, SIL, STAR_OFF, STAR_ON, catHead, catParts } from './m3v2-assets.mjs';
 import { OBSTACLES, OBSTACLE_DEFS } from './obstacles.mjs';
-import { DISH_DEFS, LOCKED_DISH, RECIPES } from './dishes.mjs';
+import { BOOSTER_ART, GARAGE_DEFS, GARAGE_OBSTACLES, LOCKED_VEHICLE, PART_TILES, VEHICLES } from './garage.mjs';
 
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const artDir = join(projectRoot, 'game', 'art');
@@ -12,10 +12,11 @@ const ATLAS_WIDTH = 2048;
 // Empty space around each sprite (in 2x pixels) so linear filtering never samples a neighbour.
 const PAD = 8;
 
-// Index + 1 is the tile kind used by the match-3 core: 1 tomato, 2 pepper, 3 egg, 4 onion, 5 cheese.
-const TILE_KEYS = ['t-d', 't-b', 't-y', 't-s', 't-p'];
-// Row clear = rolling pin, shuffle = ladle stir, single tile = knife.
-const BOOSTER_ICONS = { booster_row: 'oklava', booster_shuffle: 'kepce', booster_single: 'bicak' };
+// Row clear = wrench, shuffle = air compressor, single tile = hammer.
+const BOOSTER_ICONS = { booster_row: 'wrench', booster_shuffle: 'compressor', booster_single: 'hammer' };
+// Shared-core obstacles the garage does not redraw (mouse, belt, cage, key...) keep their art;
+// kitchen-only sprites are dropped.
+const KITCHEN_ONLY = ['tea'];
 const CAT_FRAME = { w: 200, h: 264, viewBox: '0 0 100 132' };
 const CAT_PIVOTS = {
   tail: [0.74, 118 / 132],
@@ -27,14 +28,17 @@ const CAT_PIVOTS = {
 const sprites = [];
 const add = (name, w, h, viewBox, body, pivot = [0.5, 0.5]) => sprites.push({ name, w, h, viewBox, body, pivot });
 
-TILE_KEYS.forEach((key, i) => add(`tile_${i + 1}`, 192, 192, '0 0 48 48', TILES[key]));
-for (const [name, key] of Object.entries(BOOSTER_ICONS)) add(name, 128, 128, '0 0 48 48', ICON[key]);
+// Index + 1 is the tile kind used by the match-3 core: 1 steering wheel, 2 gear, 3 headlight, 4 spark plug, 5 tyre.
+PART_TILES.forEach((art, i) => add(`tile_${i + 1}`, 192, 192, '0 0 48 48', art));
+for (const [name, key] of Object.entries(BOOSTER_ICONS)) add(name, 128, 128, '0 0 48 48', BOOSTER_ART[key]);
 add('star_on', 96, 96, '0 0 48 48', STAR_ON);
 add('star_off', 96, 96, '0 0 48 48', STAR_OFF);
 add('cat_silhouette', 200, 200, '0 0 100 100', SIL);
-for (const [name, body] of Object.entries(OBSTACLES)) add(name, 192, 192, '0 0 48 48', body);
-for (const recipe of RECIPES) add(`dish_${recipe.id}`, 240, 180, '0 0 160 120', recipe.art);
-add('dish_locked', 240, 180, '0 0 160 120', LOCKED_DISH);
+const obstacles = { ...OBSTACLES, ...GARAGE_OBSTACLES };
+for (const name of KITCHEN_ONLY) delete obstacles[name];
+for (const [name, body] of Object.entries(obstacles)) add(name, 192, 192, '0 0 48 48', body);
+for (const vehicle of VEHICLES) add(`dish_${vehicle.id}`, 240, 180, '0 0 160 120', vehicle.art);
+add('dish_locked', 240, 180, '0 0 160 120', LOCKED_VEHICLE);
 for (const cat of Object.keys(CATS)) {
   const parts = catParts(cat);
   add(`cat_${cat}_tail`, CAT_FRAME.w, CAT_FRAME.h, CAT_FRAME.viewBox, parts.tail, CAT_PIVOTS.tail);
@@ -67,7 +71,7 @@ const { placed, height } = pack(sprites);
 const inner = placed
   .map((s) => `<svg x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" viewBox="${s.viewBox}">${s.body}</svg>`)
   .join('');
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${ATLAS_WIDTH}" height="${height}" viewBox="0 0 ${ATLAS_WIDTH} ${height}"><defs>${DEFS}${OBSTACLE_DEFS}${DISH_DEFS}</defs>${inner}</svg>`;
+const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${ATLAS_WIDTH}" height="${height}" viewBox="0 0 ${ATLAS_WIDTH} ${height}"><defs>${DEFS}${OBSTACLE_DEFS}${GARAGE_DEFS}</defs>${inner}</svg>`;
 
 const render = (width) =>
   new Resvg(svg, { fitTo: { mode: 'width', value: width }, font: { loadSystemFonts: false } }).render().asPng();

@@ -12,14 +12,14 @@ rng_seed = 1027
 difficulty = 1
 layout = PackedStringArray(".......", ".......", "..PPP..", "..PPP..", "..PPP..", ".......", ".......")
 orders = Array[Dictionary]([{
-"dish": "dolma",
+"dish": "cip",
 "goals": {
 2: 18,
 4: 16
 },
 "patience": 12
 }, {
-"dish": "menemen",
+"dish": "kupa",
 "goals": {
 1: 16,
 3: 16

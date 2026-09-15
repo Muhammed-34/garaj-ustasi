@@ -24,17 +24,17 @@ func _scene(path: String) -> Control:
 	return scene
 
 
-func test_title_screen_shows_the_kitchen() -> void:
+func test_title_screen_shows_the_garage() -> void:
 	var title := _scene("res://game/scenes/title/title.tscn")
-	assert_object(title.dish.texture).is_equal(ArtAtlas.texture("dish_menemen"))
+	assert_object(title.car.texture).is_equal(ArtAtlas.texture("dish_kupa"))
 	assert_str(title.play_button.text).is_equal("Oyna")
-	assert_str(title.recipes_button.text).is_equal("Tarif Defteri")
+	assert_str(title.recipes_button.text).is_equal("Galeri")
 	assert_bool(title.has_method("handle_back")).is_true()
-	assert_str(title.kitchen.title_text).is_equal(MetaRules.GAME_NAME)
+	assert_str(title.garage.title_text).is_equal(MetaRules.GAME_NAME)
 	await get_tree().process_frame
 	await get_tree().process_frame
-	var pan: Rect2 = title.dish.get_global_rect()
-	assert_bool(pan.intersects(title.play_button.get_global_rect())).override_failure_message("pan %s covers the play button" % pan).is_false()
+	var car: Rect2 = title.car.get_global_rect()
+	assert_bool(car.intersects(title.play_button.get_global_rect())).override_failure_message("car %s covers the play button" % car).is_false()
 
 
 func test_title_play_button_continues_from_the_next_level() -> void:
@@ -44,11 +44,11 @@ func test_title_play_button_continues_from_the_next_level() -> void:
 	assert_str(title.next_label.text).contains("2")
 
 
-func test_tapping_the_title_pan_stirs_it() -> void:
+func test_tapping_the_title_car_makes_it_bounce() -> void:
 	var title := _scene("res://game/scenes/title/title.tscn")
-	title.stir_pan()
-	assert_int(title.stirs).is_equal(1)
-	assert_float(title.kitchen.puff).is_equal(1.0)
+	title.honk()
+	assert_int(title.honks).is_equal(1)
+	assert_float(title.garage.shine).is_equal(1.0)
 
 
 func test_map_offers_a_way_back_to_the_title() -> void:

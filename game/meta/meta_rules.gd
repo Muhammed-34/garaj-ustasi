@@ -2,28 +2,29 @@ class_name MetaRules
 extends RefCounted
 
 # Shown on the title sign, the map header and the boot screen; change it here only.
-const GAME_NAME := "Tarif Mutfağı"
-# Recipe book in unlock order; ids match the dish_<id> sprites drawn by tools/art/dishes.mjs.
+const GAME_NAME := "Garaj Ustası"
+# Gallery vehicles in unlock order; ids match the dish_<id> sprites drawn by tools/art/garage.mjs.
+# The "recipe" names stay from the shared core: a recipe here is a vehicle and a dish is a finished job.
 const RECIPES := [
-	{"id": "menemen", "name": "Menemen"},
-	{"id": "coban", "name": "Çoban Salatası"},
-	{"id": "omlet", "name": "Peynirli Omlet"},
-	{"id": "mercimek", "name": "Mercimek Çorbası"},
-	{"id": "gozleme", "name": "Gözleme"},
-	{"id": "dolma", "name": "Biber Dolması"},
-	{"id": "pide", "name": "Peynirli Pide"},
-	{"id": "imam", "name": "İmam Bayıldı"},
-	{"id": "kahvalti", "name": "Kahvaltı Tabağı"},
-	{"id": "lahmacun", "name": "Lahmacun"},
-	{"id": "karniyarik", "name": "Karnıyarık"},
-	{"id": "cilbir", "name": "Çılbır"},
+	{"id": "kupa", "name": "Kırmızı Kupa"},
+	{"id": "skuter", "name": "Mavi Skuter"},
+	{"id": "pikap", "name": "Yeşil Pikap"},
+	{"id": "minibus", "name": "Sarı Minibüs"},
+	{"id": "kros", "name": "Turuncu Kros Motor"},
+	{"id": "cip", "name": "Haki Cip"},
+	{"id": "klasik", "name": "Krem Klasik"},
+	{"id": "yaris", "name": "Beyaz Yarış Arabası"},
+	{"id": "cekici", "name": "Turuncu Çekici"},
+	{"id": "hizli", "name": "Mor Hızlı Motor"},
+	{"id": "itfaiye", "name": "İtfaiye Aracı"},
+	{"id": "karavan", "name": "Turkuaz Karavan"},
 ]
 const QUOTES := [
-	"Tam kıvamında, eline sağlık!",
-	"Annemin yemeği gibi olmuş!",
-	"Bir porsiyon daha alabilir miyim?",
-	"Mis gibi kokuyor!",
-	"Şefe selamlarımı iletin!",
+	"Pırıl pırıl olmuş, eline sağlık!",
+	"Motor kedi gibi mırlıyor!",
+	"Sıfır gibi oldu, inanamıyorum!",
+	"Yola çıkmaya hazırım!",
+	"Ustaya selamlarımı iletin!",
 ]
 const RESCUE_LEVELS := [5, 12, 20, 30, 40, 50, 60]
 const BREEDS := ["tekir", "pamuk", "tarcin", "gece", "boncuk", "fistik", "limon", "duman"]
@@ -45,15 +46,15 @@ const NAME_POOL := [
 	"Zeytin", "Paşa", "Mırmır", "Karamel", "Bulut", "Minnoş", "Şans", "Tontiş",
 	"Pofuduk", "Fındık", "Kömür", "Pıtırcık", "Lokum", "Susam", "Bıcır", "Maviş",
 ]
-const BOOSTER_NAMES := {"row": "Oklava", "shuffle": "Kepçe", "single": "Bıçak"}
-# A new recipe joins the book every RECIPE_STEP levels, starting with level 1.
+const BOOSTER_NAMES := {"row": "Anahtar", "shuffle": "Kompresör", "single": "Çekiç"}
+# A new vehicle joins the gallery every RECIPE_STEP levels, starting with level 1.
 const RECIPE_STEP := 5
-# The restaurant grows as the recipe book fills.
+# The garage grows a rank as the gallery fills.
 const RESTAURANTS := [
-	{"name": "Esnaf Lokantası", "recipes": 0},
-	{"name": "Ev Yemekleri Salonu", "recipes": 4},
-	{"name": "Şef Restoranı", "recipes": 8},
-	{"name": "Usta Mutfağı", "recipes": 12},
+	{"name": "Mahalle Garajı", "recipes": 0},
+	{"name": "Oto Tamirhanesi", "recipes": 4},
+	{"name": "Usta Atölyesi", "recipes": 8},
+	{"name": "Şampiyon Galeri", "recipes": 12},
 ]
 const CALENDAR := [
 	{"coins": 50},
@@ -77,7 +78,7 @@ static func recipe_name(id: String) -> String:
 	for recipe in RECIPES:
 		if recipe.id == id:
 			return recipe.name
-	return "Sipariş"
+	return "İş emri"
 
 
 static func quote_for(level_id: int) -> String:

@@ -64,7 +64,7 @@ func test_retrying_a_lost_level_empties_a_bowl() -> void:
 	await _play_one_move(game)
 	_lose(game)
 	assert_int(_progress.bowls()).is_equal(MetaRules.MAX_BOWLS)
-	assert_str(game._end_detail.text).contains("çay eksilir")
+	assert_str(game._end_detail.text).contains("bidonu boşalır")
 	game._on_primary()
 	assert_int(_progress.bowls()).is_equal(MetaRules.MAX_BOWLS - 1)
 	assert_int(game.session.moves_left).is_equal(game.level.moves)
@@ -110,7 +110,7 @@ func test_restarting_after_a_move_costs_a_bowl() -> void:
 	var game := _game()
 	await _play_one_move(game)
 	game.open_pause()
-	assert_str(game._pause_note.text).contains("çay eksilir")
+	assert_str(game._pause_note.text).contains("bidonu boşalır")
 	game._on_pause_restart()
 	assert_int(_progress.bowls()).is_equal(MetaRules.MAX_BOWLS - 1)
 
@@ -131,9 +131,9 @@ func _order_game(orders: Array) -> Control:
 
 
 func test_order_cards_show_tables_ingredients_and_patience() -> void:
-	var game := _order_game([{"dish": "menemen", "goals": {1: 4, 2: 2}, "patience": 12}, {"dish": "coban", "goals": {4: 3}, "patience": 9}])
+	var game := _order_game([{"dish": "kupa", "goals": {1: 4, 2: 2}, "patience": 12}, {"dish": "skuter", "goals": {4: 3}, "patience": 9}])
 	assert_int(game._order_cards.size()).is_equal(2)
-	assert_str(game._order_cards[0].card.get_child(0).get_child(1).get_child(0).text).is_equal("MASA 1 · Menemen")
+	assert_str(game._order_cards[0].card.get_child(0).get_child(1).get_child(0).text).is_equal("İŞ 1 · Kırmızı Kupa")
 	assert_str(game._order_cards[0].items[1].count.text).is_equal("0/4")
 	assert_str(game._order_cards[1].patience.text).is_equal("9")
 	game.session.orders[0].need[1] = 1
@@ -144,7 +144,7 @@ func test_order_cards_show_tables_ingredients_and_patience() -> void:
 
 
 func test_order_card_stays_one_compact_row() -> void:
-	var game := _order_game([{"dish": "menemen", "goals": {1: 8, 2: 6}, "patience": 20}])
+	var game := _order_game([{"dish": "kupa", "goals": {1: 8, 2: 6}, "patience": 20}])
 	await get_tree().process_frame
 	await get_tree().process_frame
 	var card: Control = game._order_cards[0].card
@@ -154,24 +154,24 @@ func test_order_card_stays_one_compact_row() -> void:
 
 
 func test_served_order_shows_on_its_card_and_wins_with_its_dish() -> void:
-	var game := _order_game([{"dish": "omlet", "goals": {3: 1}, "patience": 20}])
+	var game := _order_game([{"dish": "pikap", "goals": {3: 1}, "patience": 20}])
 	game.session.orders[0].need[3] = 0
 	game.session.orders[0].state = M3Session.ORDER_SERVED
 	game._refresh_orders()
-	assert_str(game._order_cards[0].status.text).is_equal("Servis edildi")
+	assert_str(game._order_cards[0].status.text).is_equal("Teslim edildi")
 	game.session.moves_left = 0
 	game._check_end()
 	assert_str(str(game.end_state())).is_equal("win")
-	assert_str(game._end_title.text).is_equal("Peynirli Omlet hazır!")
+	assert_str(game._end_title.text).is_equal("Yeşil Pikap hazır!")
 
 
 func test_table_running_out_of_patience_explains_the_loss() -> void:
 	_progress.data.coins = 300
-	var game := _order_game([{"dish": "menemen", "goals": {1: 99}, "patience": 1}])
+	var game := _order_game([{"dish": "kupa", "goals": {1: 99}, "patience": 1}])
 	game.session.orders[0].patience = 0
 	game._check_end()
-	assert_str(game._end_title.text).is_equal("Müşteri kalktı")
-	assert_str(game._end_detail.text).contains("Masa 1")
+	assert_str(game._end_title.text).is_equal("Müşteri gitti")
+	assert_str(game._end_detail.text).contains("Müşteri 1")
 	game._on_coin_continue()
 	assert_int(game.session.orders[0].patience).is_equal(_progress.CONTINUE_MOVES)
 	assert_bool(game.session.is_finished()).is_false()
@@ -191,7 +191,7 @@ func test_using_a_booster_starts_the_attempt() -> void:
 	await game._use_booster(M3.BOOSTER_SHUFFLE, Vector2i.ZERO)
 	assert_int(int(_progress.data.bowls.open_level)).is_equal(1)
 	game.open_pause()
-	assert_str(game._pause_note.text).contains("çay eksilir")
+	assert_str(game._pause_note.text).contains("bidonu boşalır")
 	game.fail_attempt()
 	assert_int(_progress.bowls()).is_equal(MetaRules.MAX_BOWLS - 1)
 
@@ -354,12 +354,12 @@ func test_first_win_on_a_recipe_level_adds_it_to_the_book() -> void:
 	_finish(game)
 	game.session.moves_left = 0
 	game._check_end()
-	assert_str(game._end_detail.text).contains("Çoban Salatası tarif defterine eklendi")
+	assert_str(game._end_detail.text).contains("Mavi Skuter galeriye eklendi")
 	var again := _game()
 	_finish(again)
 	again.session.moves_left = 0
 	again._check_end()
-	assert_str(again._end_detail.text).not_contains("tarif defterine")
+	assert_str(again._end_detail.text).not_contains("galeriye")
 
 
 func test_losing_offers_coin_continue_only_when_affordable() -> void:

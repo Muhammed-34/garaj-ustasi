@@ -1,7 +1,7 @@
 extends Control
 
-# Tarif Defteri: every recipe in unlock order. A recipe joins the book the first time its level is won;
-# the restaurant grows a rank as the book fills.
+# Galeri: every vehicle in unlock order. A vehicle joins the gallery the first time its level is won;
+# the garage grows a rank as the gallery fills. The "recipe" names come from the shared core.
 var cards: Array[PanelContainer] = []
 var dish_images: Array[TextureRect] = []
 var restaurant_label: Label
@@ -24,7 +24,7 @@ func _ready() -> void:
 	var back := UiKit.button("‹", 40, Vector2(80, 72))
 	back.pressed.connect(handle_back)
 	top.add_child(back)
-	var title := UiKit.label("Tarif Defteri", 46)
+	var title := UiKit.label("Galeri", 46)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(title)
 	var count := UiKit.pill("", Color.WHITE, UiKit.INK, 28)
@@ -36,22 +36,22 @@ func _ready() -> void:
 	count.get_child(0).text = "%d / %d" % [_unlocked, MetaRules.RECIPES.size()]
 
 	var header := PanelContainer.new()
-	header.add_theme_stylebox_override("panel", UiKit.box(Color("2f5240"), 28, 22))
+	header.add_theme_stylebox_override("panel", UiKit.box(Color("3d5a80"), 28, 22))
 	column.add_child(header)
 	var header_rows := VBoxContainer.new()
 	header_rows.add_theme_constant_override("separation", 4)
 	header.add_child(header_rows)
-	restaurant_label = UiKit.centered_label("", 38, Color("fff4e0"))
+	restaurant_label = UiKit.centered_label("", 38, Color.WHITE)
 	header_rows.add_child(restaurant_label)
-	next_label = UiKit.centered_label("", 24, Color("c9b27a"))
+	next_label = UiKit.centered_label("", 24, Color("ffd166"))
 	header_rows.add_child(next_label)
 	var rank := MetaRules.restaurant_index(_unlocked)
 	restaurant_label.text = MetaRules.RESTAURANTS[rank].name
 	if rank + 1 < MetaRules.RESTAURANTS.size():
 		var next: Dictionary = MetaRules.RESTAURANTS[rank + 1]
-		next_label.text = "Sonraki: %s · %d tarif kaldı" % [next.name, int(next.recipes) - _unlocked]
+		next_label.text = "Sonraki: %s · %d araç kaldı" % [next.name, int(next.recipes) - _unlocked]
 	else:
-		next_label.text = "Mutfağın en yüksek rütbesindesin!"
+		next_label.text = "Garajın en yüksek rütbesindesin!"
 
 	var scroll := DragScroll.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL

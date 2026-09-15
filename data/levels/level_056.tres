@@ -9,7 +9,7 @@ moves = 22
 rng_seed = 1056
 layout = PackedStringArray()
 orders = Array[Dictionary]([{
-"dish": "cilbir",
+"dish": "karavan",
 "goals": {
 2: 29,
 3: 33

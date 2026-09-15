@@ -34,7 +34,7 @@ func test_empty_recipe_book_shows_where_each_recipe_opens() -> void:
 	assert_int(book.unlocked_count()).is_equal(0)
 	assert_object(book.dish_images[0].texture).is_equal(ArtAtlas.texture("dish_locked"))
 	assert_str(book.restaurant_label.text).is_equal(MetaRules.RESTAURANTS[0].name)
-	assert_str(book.next_label.text).contains("4 tarif kaldı")
+	assert_str(book.next_label.text).contains("4 araç kaldı")
 
 
 func test_won_recipe_levels_fill_the_book() -> void:
@@ -67,7 +67,7 @@ func test_every_recipe_has_dish_art() -> void:
 	for recipe in MetaRules.RECIPES:
 		assert_bool(ArtAtlas.has_sprite("dish_%s" % recipe.id)).is_true()
 	assert_bool(ArtAtlas.has_sprite("dish_locked")).is_true()
-	assert_bool(ArtAtlas.has_sprite("tea")).is_true()
+	assert_bool(ArtAtlas.has_sprite("fuel")).is_true()
 
 
 func test_map_marker_shows_the_won_dish() -> void:
@@ -77,15 +77,15 @@ func test_map_marker_shows_the_won_dish() -> void:
 	assert_int(map.recipe_markers.size()).is_equal(MetaRules.RECIPES.size())
 	assert_object(map.recipe_markers[first].texture).is_equal(ArtAtlas.texture("dish_locked"))
 	_progress.record_win(first, 5, 20)
-	assert_object(map.recipe_markers[first].texture).is_equal(ArtAtlas.texture("dish_menemen"))
+	assert_object(map.recipe_markers[first].texture).is_equal(ArtAtlas.texture("dish_kupa"))
 	assert_object(map.recipe_markers[second].texture).is_equal(ArtAtlas.texture("dish_locked"))
 
 
-func test_map_lives_are_cups_of_tea() -> void:
+func test_map_lives_are_fuel_cans() -> void:
 	var map := _scene("res://game/scenes/map/map.tscn")
-	assert_object(map.bowl_icons[0].texture).is_equal(ArtAtlas.texture("tea"))
-	assert_str(map._bowl_label.text).is_equal("Çaylar hazır")
-	assert_str(map.recipes_button.text).is_equal("Tarif Defteri")
+	assert_object(map.bowl_icons[0].texture).is_equal(ArtAtlas.texture("fuel"))
+	assert_str(map._bowl_label.text).is_equal("Depo dolu")
+	assert_str(map.recipes_button.text).is_equal("Galeri")
 
 
 func test_map_calendar_claims_todays_gift() -> void:

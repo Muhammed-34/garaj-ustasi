@@ -8,7 +8,7 @@ id = 5
 rng_seed = 1005
 layout = PackedStringArray()
 orders = Array[Dictionary]([{
-"dish": "menemen",
+"dish": "kupa",
 "goals": {
 1: 12,
 2: 12

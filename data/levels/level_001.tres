@@ -7,7 +7,7 @@ script = ExtResource("1_ehj8t")
 rng_seed = 1001
 layout = PackedStringArray()
 orders = Array[Dictionary]([{
-"dish": "menemen",
+"dish": "kupa",
 "goals": {
 1: 8,
 2: 6

@@ -12,7 +12,7 @@ goals = Dictionary[int, int]({
 rng_seed = 1025
 layout = PackedStringArray("P.....P", ".P...P.", "..P.P..", "...P...", "..P.P..", ".P...P.", "P.....P")
 orders = Array[Dictionary]([{
-"dish": "gozleme",
+"dish": "kros",
 "goals": {
 4: 30,
 5: 30
